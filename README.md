@@ -1,4 +1,4 @@
-# Calculatree (working name)
+# Unitree
 
 ## Development
 1. Install Bun from https://bun.sh/
