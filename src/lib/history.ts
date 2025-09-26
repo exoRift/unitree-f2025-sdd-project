@@ -10,6 +10,7 @@ const Z_CODE = 'Z'.charCodeAt(0)
  */
 export class Tree {
   private idLetterIterator = 'A'
+  private readonly nodes = new Set<Node>()
   idNumberIterators = new Map<string, number>()
 
   roots: Node[] = []
@@ -36,9 +37,15 @@ export class Tree {
    * Create a new node (root, if no dependencies specified)
    * @param             equation     The equation inputted by the user
    * @param   {...Node} dependencies The other nodes this node depends on, if any
+   * @throws  {Error}                if a dependency is given that is not present in the tree
    * @returns                        The created node
    */
   newNode (equation: unknown, ...dependencies: Node[]): Node {
+    for (const dep of dependencies) {
+      if (!this.nodes.has(dep)) throw new Error(`Dependency with ID "${dep.id}" not present in tree`)
+    }
+
+    let node: Node
     if (dependencies.length) {
       // If this is a descendant of more than one node, use a new letter
       const letterConstraint = dependencies.length > 1
@@ -46,17 +53,31 @@ export class Tree {
         : dependencies[0].id.match(/^\w+/)![0]
 
       const id = this.generateID(letterConstraint)
-      const node = new Node(id, equation)
-      dependencies.forEach((d) => node.addDependency(d))
-
-      return node
+      node = new Node(id, equation)
+      dependencies.forEach((d) => this.addDependency(node, d))
     } else {
       const id = this.generateID()
-      const node = new Node(id, equation)
+      node = new Node(id, equation)
       this.roots.push(node)
-
-      return node
     }
+
+    this.nodes.add(node)
+    return node
+  }
+
+  /**
+   * Establish a dependency relation between two nodes
+   * @mutates The dependent and dependency sets of the nodes
+   * @param          dependent  The dependent node
+   * @param          dependency The node to depend on
+   * @throws {Error}            if either node is not present in the tree
+   */
+  addDependency (dependent: Node, dependency: Node): void {
+    if (!this.nodes.has(dependent)) throw new Error('Dependent node not present in tree')
+    if (!this.nodes.has(dependency)) throw new Error('Dependency node not present in tree')
+
+    dependent.dependencies.add(dependency)
+    dependency.dependents.add(dependent)
   }
 }
 
@@ -79,15 +100,5 @@ export class Node {
   constructor (id: string, equation: unknown) {
     this.id = id
     this.equation = equation
-  }
-
-  /**
-   * Establish another node as a dependency of this node.
-   * @mutates This dependency set and the dependency's dependent set
-   * @param   dependency The node to depend on
-   */
-  addDependency (dependency: Node): void {
-    this.dependencies.add(dependency)
-    dependency.dependents.add(this)
   }
 }
