@@ -19,9 +19,9 @@ export class Tree {
 
   /**
    * Generate a new incremented unique ID for a node
-   * @param letterConstraint A letter to constrain the ID to
-   * @mutates
-   * @returns                The ID
+   * @mutates The ID iterator state
+   * @param   letterConstraint A letter to constrain the ID to
+   * @returns                  The ID
    */
   private generateID (letterConstraint?: string): string {
     const letter = letterConstraint ?? this.idLetterIterator
@@ -96,6 +96,17 @@ export class Tree {
     this.idLookup.delete(node.id)
     if (node.alias) this.aliasLookup.delete(node.alias)
     return true
+  }
+
+  /**
+   * Add an alias for a node
+   * @param node  The node
+   * @param alias The alias
+   */
+  setAlias (node: Node, alias: string): void {
+    if (!alias) return
+    node.alias = alias
+    this.aliasLookup.set(alias, node)
   }
 }
 
