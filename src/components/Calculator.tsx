@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { Button, Input } from 'react-daisyui'
 
 /**
@@ -6,13 +6,16 @@ import { Button, Input } from 'react-daisyui'
  * TODO: Add instructions into the margins
  */
 export function Calculator (): React.ReactNode {
-  const result = '--'
+  const [result, setResult] = useState('--')
   const submitEquation = useCallback(() => {
     // Placeholder for submission logic
     console.log('Equation submitted')
     const inputValue = (document.getElementById('eqInput') as HTMLInputElement).value
     console.log('Input Value:', inputValue)
     // TODO: Send inputValue to backend and get result (@LittleSilver33)
+    // result = solve(inputValue)
+    // setResult(result)
+    setResult('42') // Placeholder result
   }, [])
   const appendSymbol = useCallback((symbol: string) => {
     const input = document.getElementById('eqInput') as HTMLInputElement
