@@ -41,8 +41,8 @@ export class Tree {
    * @returns                        The created node
    */
   newNode (equation: unknown, ...dependencies: Node[]): Node {
-    for (const dep of dependencies) {
-      if (!this.nodes.has(dep)) throw new Error(`Dependency with ID "${dep.id}" not present in tree`)
+    for (const dependency of dependencies) {
+      if (!this.nodes.has(dependency)) throw new Error(`Dependency with ID "${dependency.id}" not present in tree`)
     }
 
     let node: Node
@@ -62,6 +62,7 @@ export class Tree {
     }
 
     this.nodes.add(node)
+    this.idLookup.set(node.id, node)
     return node
   }
 
@@ -78,6 +79,23 @@ export class Tree {
 
     dependent.dependencies.add(dependency)
     dependency.dependents.add(dependent)
+  }
+
+  /**
+   * Delete a node from a tree and all of its dependents
+   * @param node The node to delete
+   * @returns    true if successful, false is idempotent
+   */
+  deleteNode (node: Node): boolean {
+    if (!this.nodes.has(node)) return false
+
+    for (const dependent of node.dependents) this.deleteNode(dependent)
+    for (const dep of node.dependencies) dep.dependents.delete(node)
+
+    this.nodes.delete(node)
+    this.idLookup.delete(node.id)
+    if (node.alias) this.aliasLookup.delete(node.alias)
+    return true
   }
 }
 
