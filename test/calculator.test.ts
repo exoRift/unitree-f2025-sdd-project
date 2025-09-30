@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test'
-import { evaluateNumeric } from '../lib/calculator'
+import { evaluateNumeric } from '../src/lib/calculator'
 
 test('adds two positive numbers', () => {
   const res = evaluateNumeric('2+3')
