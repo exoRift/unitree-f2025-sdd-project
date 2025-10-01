@@ -11,14 +11,17 @@ export function Toolbar (): React.ReactNode {
       <div className='bg-[#54ab5d] flex flex-row text-black font-bold items-center w-full rounded'>
         <img src={logo} alt="logo" className="max-w-20 max-h-20 aspect-auto pl-5"></img>
         <div className="flex flex-row justify-between w-full pl-200 pr-20">
+          {/* Save Button (with alert functionality only)*/}
           <button className="duration-200 hover:text-white hover:cursor-pointer hover:scale-110 text-lg rounded-lg h-12 w-20 aspect-auto" 
           onClick={() => alert("Progress Saved")}>
             Save
           </button>
+          {/* Restart Button (with alert functionality only) */}
           <button className="duration-200 hover:text-white hover:cursor-pointer hover:scale-110 text-lg rounded-lg h-12 w-20 aspect-auto"
           onClick={() => alert("Progress Restarted")}>
             Restart
           </button>
+          {/* Settings Button (fully functional)*/}
           <button className="duration-200 hover:text-white hover:cursor-pointer hover:scale-110 text-lg rounded-lg h-12 w-20 aspect-auto"
           onClick={() => setIsOpen(true)}>
             Settings
@@ -26,14 +29,16 @@ export function Toolbar (): React.ReactNode {
         </div>
       </div>
 
+{/* Pop-up (not functional) */}
       {isOpen && (
-        <div className="fixed inset-16 inset-x-100 bg-[#54ab5d] text-black rounded flex flex-col items-center justify-center z-50">
+        <div className="fixed inset-26 inset-x-120 bg-[#54ab5d] text-black rounded flex flex-col items-center justify-center z-50">
           <div className="justify-items-between h-1/2 w-1/2">
             <h1 className="pb-5 text-xl font-bold">Settings</h1>
+          {/* Checkboxes (not functional) */}
             <div className="flex flex-col">
               <label className="hover:cursor-pointer">
                 <input type="checkbox" className="hover:cursor-pointer"></input>
-                Swap Divider
+                Horizonal Divider
               </label>
               <label className="hover:cursor-pointer">
                 <input type="checkbox" className="hover:cursor-pointer"></input>
@@ -42,6 +47,7 @@ export function Toolbar (): React.ReactNode {
             </div>
           </div>
           <div>
+          {/* Close Button for Pop-up (fully functional)*/}
             <button className="font-bold duration-200 hover:text-white hover:cursor-pointer hover:scale-110 text-lg rounded-lg h-12 w-20 aspect-auto" onClick={() => setIsOpen(false)}>Close</button>
           </div>
         </div>
