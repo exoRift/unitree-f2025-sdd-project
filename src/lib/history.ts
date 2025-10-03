@@ -115,6 +115,12 @@ export class Tree {
 
     this.nodes.delete(node)
     this.idLookup.delete(node.id)
+    for (let i : number = 0; i < this.roots.length; i++) {
+      if (this.roots[i].id == node.id) {
+        this.roots.splice(i,1);
+        break;
+      }
+    }
     if (node.alias) this.aliasLookup.delete(node.alias)
     return true
   }
@@ -141,6 +147,7 @@ export class TreeNode {
   dependencies = new Set<TreeNode>()
   dependents = new Set<TreeNode>()
   equation: unknown
+  note? : string
 
   /**
    * Construct a node
