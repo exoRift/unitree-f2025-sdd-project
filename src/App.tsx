@@ -1,5 +1,9 @@
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 
+import { createContext } from 'react'
+import { Tree } from './lib/history'
+import { useTree } from './hooks/useTree'
+
 import { Toolbar } from './components/Toolbar'
 import { HistoryTree } from './components/HistoryTree'
 import { Calculator } from './components/Calculator'
@@ -17,23 +21,29 @@ function ResizeHandle (): React.ReactNode {
   )
 }
 
+export const TreeContext = createContext<{ tree: Tree }>({ tree: new Tree() })
+
 /**
  * The main app
  */
 export default function App (): React.ReactNode {
-  return (
-    <div className='min-h-screen grid grid-rows-[auto_1fr] grid-cols-1'>
-      <Toolbar />
+  const tree = useTree()
 
-      <PanelGroup autoSaveId='treecalcsplit' direction='horizontal'>
-        <Panel id='historytree' minSize={15}>
-          <HistoryTree />
-        </Panel>
-        <ResizeHandle />
-        <Panel id='calculator' minSize={40}>
-          <Calculator />
-        </Panel>
-      </PanelGroup>
-    </div>
+  return (
+    <TreeContext.Provider value={{ tree }}>
+      <div className='min-h-screen grid grid-rows-[auto_1fr] grid-cols-1'>
+        <Toolbar />
+
+        <PanelGroup autoSaveId='treecalcsplit' direction='horizontal'>
+          <Panel id='historytree' minSize={15}>
+            <HistoryTree />
+          </Panel>
+          <ResizeHandle />
+          <Panel id='calculator' minSize={40}>
+            <Calculator />
+          </Panel>
+        </PanelGroup>
+      </div>
+    </TreeContext.Provider>
   )
 }
