@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import './icons.css';
-@plugin 'daisyui';
 @source '../../node_modules/daisyui/dist/**/*.js';
 @source '../../node_modules/react-daisyui/dist/**/*.js';
+@plugin "daisyui" {
+  themes: emerald --default;
+}
