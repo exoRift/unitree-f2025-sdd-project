@@ -36,27 +36,27 @@ export function Calculator (): React.ReactNode {
     <div className='p-4'>
       <h1 className='text-2xl font-bold mb-4'>Calculator</h1>
       <p>Creating a new Node</p>
-      <form onSubmit={(e) => { e.preventDefault(); submitEquation() }} className='mb-4'>
+      <form onSubmit={(e) => { e.preventDefault(); submitEquation() }} className='flex gap-2 flex-wrap mb-4'>
         <Input id='eqInput' className='w-full max-w-xs' />
-        <Button type='submit' color='primary' onClick={submitEquation} className='mt-2'>Evaluate</Button>
+        <Button type='submit' color='primary' onClick={submitEquation}>Evaluate</Button>
       </form>
-      <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96'>
-        <Button color='secondary' onClick={() => appendSymbol('7')}>7</Button>
-        <Button color='secondary' onClick={() => appendSymbol('8')}>8</Button>
-        <Button color='secondary' onClick={() => appendSymbol('9')}>9</Button>
-        <Button color='secondary' onClick={() => appendSymbol('*')}>*</Button>
-        <Button color='secondary' onClick={() => appendSymbol('4')}>4</Button>
-        <Button color='secondary' onClick={() => appendSymbol('5')}>5</Button>
-        <Button color='secondary' onClick={() => appendSymbol('6')}>6</Button>
-        <Button color='secondary' onClick={() => appendSymbol('/')}>/</Button>
-        <Button color='secondary' onClick={() => appendSymbol('1')}>1</Button>
-        <Button color='secondary' onClick={() => appendSymbol('2')}>2</Button>
-        <Button color='secondary' onClick={() => appendSymbol('3')}>3</Button>
-        <Button color='secondary' onClick={() => appendSymbol('+')}>+</Button>
-        <Button color='secondary' onClick={negate}>+/-</Button>
-        <Button color='secondary' onClick={() => appendSymbol('0')}>0</Button>
-        <Button color='secondary' onClick={() => appendSymbol('.')}>.</Button>
-        <Button color='secondary' onClick={() => appendSymbol('-')}>-</Button>
+      <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-2xl'>
+        <Button color='neutral' onClick={() => appendSymbol('7')}>7</Button>
+        <Button color='neutral' onClick={() => appendSymbol('8')}>8</Button>
+        <Button color='neutral' onClick={() => appendSymbol('9')}>9</Button>
+        <Button color='neutral' onClick={() => appendSymbol('*')}>*</Button>
+        <Button color='neutral' onClick={() => appendSymbol('4')}>4</Button>
+        <Button color='neutral' onClick={() => appendSymbol('5')}>5</Button>
+        <Button color='neutral' onClick={() => appendSymbol('6')}>6</Button>
+        <Button color='neutral' onClick={() => appendSymbol('/')}>/</Button>
+        <Button color='neutral' onClick={() => appendSymbol('1')}>1</Button>
+        <Button color='neutral' onClick={() => appendSymbol('2')}>2</Button>
+        <Button color='neutral' onClick={() => appendSymbol('3')}>3</Button>
+        <Button color='neutral' onClick={() => appendSymbol('+')}>+</Button>
+        <Button color='neutral' onClick={negate}>+/-</Button>
+        <Button color='neutral' onClick={() => appendSymbol('0')}>0</Button>
+        <Button color='neutral' onClick={() => appendSymbol('.')}>.</Button>
+        <Button color='neutral' onClick={() => appendSymbol('-')}>-</Button>
       </div>
       <div className='mt-4'>
         <h2 className='text-xl font-semibold'>Result:</h2>
