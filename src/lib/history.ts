@@ -40,9 +40,9 @@ export class Tree {
 
   /**
    * Generate a new incremented unique ID for a node
-   * @mutates The ID iterator state
-   * @param   letterConstraint A letter to constrain the ID to
-   * @returns                  The ID
+   * @modifies The ID iterator state
+   * @param    letterConstraint A letter to constrain the ID to
+   * @returns                   The ID
    */
   private generateID (letterConstraint?: string): string {
     const letter = letterConstraint ?? Tree.numberToLetterSeries(this.idLetterIterator)
@@ -89,7 +89,7 @@ export class Tree {
 
   /**
    * Establish a dependency relation between two nodes
-   * @mutates The dependent and dependency sets of the nodes
+   * @modifies The dependent and dependency sets of the nodes
    * @param          dependent  The dependent node
    * @param          dependency The node to depend on
    * @throws {Error}            if either node is not present in the tree
@@ -115,10 +115,10 @@ export class Tree {
 
     this.nodes.delete(node)
     this.idLookup.delete(node.id)
-    for (let i : number = 0; i < this.roots.length; i++) {
-      if (this.roots[i].id == node.id) {
-        this.roots.splice(i,1);
-        break;
+    for (let i = 0; i < this.roots.length; i++) {
+      if (this.roots[i].id === node.id) {
+        this.roots.splice(i, 1)
+        break
       }
     }
     if (node.alias) this.aliasLookup.delete(node.alias)
@@ -147,7 +147,7 @@ export class TreeNode {
   dependencies = new Set<TreeNode>()
   dependents = new Set<TreeNode>()
   equation: unknown
-  note? : string
+  note?: string
 
   /**
    * Construct a node

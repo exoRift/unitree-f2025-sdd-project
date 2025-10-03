@@ -1,28 +1,19 @@
-/*
-Remove-Item -Recurse -Force node_modules, bun.lockb, bun.lock, package-lock.json
-bun pm cache rm
-bun i
-bun run --bun dev
-*/
-
-import { useEffect, useRef, useState } from "react"
-// import { TreeNode, Tree } from "../lib/history"
-import { useTreeContext } from "../App";
-
+import { useContext, useEffect } from 'react'
+import { TreeContext } from '../App'
 import { OneBox } from './HistoryTree/OneBox'
 
 /**
  * The history tree component. Handles the history
  */
 export function HistoryTree (): React.ReactNode {
-  const { tree } = useTreeContext();
+  const { tree } = useContext(TreeContext)
 
   useEffect(() => {
     if (tree.roots.length === 0) {
       tree.addNewNode('bruh moment')
       tree.addNewNode('lmao')
     }
-  }, [])
+  })
 
   return (
     <div className='overflow-auto h-full min-w-full max-w-max'>
