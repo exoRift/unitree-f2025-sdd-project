@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { Button, Input } from 'react-daisyui'
+import { evaluateNumeric } from '../lib/calculator'
 
 /**
  * The calculator component. Handles the math input and eval
@@ -13,9 +14,9 @@ export function Calculator (): React.ReactNode {
     const inputValue = (document.getElementById('eqInput') as HTMLInputElement).value
     console.log('Input Value:', inputValue)
     // TODO: Send inputValue to backend and get result (@LittleSilver33)
-    // result = solve(inputValue)
-    // setResult(result)
-    setResult('42') // Placeholder result
+    const outcome = evaluateNumeric(inputValue)
+    if (outcome.ok) setResult(outcome.value.toString())
+    else setResult('Error: ' + outcome.error)
   }, [])
   const appendSymbol = useCallback((symbol: string) => {
     const input = document.getElementById('eqInput') as HTMLInputElement
@@ -35,8 +36,10 @@ export function Calculator (): React.ReactNode {
     <div className='p-4'>
       <h1 className='text-2xl font-bold mb-4'>Calculator</h1>
       <p>Creating a new Node</p>
-      <Input id='eqInput' className='w-full max-w-xs' />
-      <button onClick={submitEquation} className='btn btn-primary mt-2'>Evaluate</button>
+      <form onSubmit={(e) => { e.preventDefault(); submitEquation() }} className='mb-4'>
+        <Input id='eqInput' className='w-full max-w-xs' />
+        <Button type='submit' color='primary' onClick={submitEquation} className='mt-2'>Evaluate</Button>
+      </form>
       <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96'>
         <Button color='secondary' onClick={() => appendSymbol('7')}>7</Button>
         <Button color='secondary' onClick={() => appendSymbol('8')}>8</Button>
