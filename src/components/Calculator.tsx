@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Button, Input } from 'react-daisyui'
+import { Button } from 'react-daisyui'
 import { evaluateNumeric } from '../lib/calculator'
 
 /**
@@ -37,7 +37,8 @@ export function Calculator (): React.ReactNode {
       <h1 className='text-2xl font-bold mb-4'>Calculator</h1>
       <p>Creating a new Node</p>
       <form onSubmit={(e) => { e.preventDefault(); submitEquation() }} className='flex gap-2 flex-wrap mb-4'>
-        <Input id='eqInput' className='w-full max-w-xs' />
+        {/* <Input id='eqInput' className='w-full max-w-xs' /> */}
+        <math-field id='eqInput' className='w-full max-w-xs border-2'>2 + 2</math-field>
         <Button type='submit' color='primary' onClick={submitEquation}>Evaluate</Button>
       </form>
       <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-2xl'>
