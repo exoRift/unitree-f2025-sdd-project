@@ -13,7 +13,6 @@ export function Calculator (): React.ReactNode {
     console.log('Equation submitted')
     const inputValue = (document.getElementById('eqInput') as HTMLInputElement).value
     console.log('Input Value:', inputValue)
-    // TODO: Send inputValue to backend and get result (@LittleSilver33)
     const outcome = evaluateNumeric(inputValue)
     if (outcome.ok) setResult(outcome.value.toString())
     else setResult('Error: ' + outcome.error)
@@ -36,11 +35,8 @@ export function Calculator (): React.ReactNode {
     <div className='p-4'>
       <h1 className='text-2xl font-bold mb-4'>Calculator</h1>
       <p>Creating a new Node</p>
-      <form onSubmit={(e) => { e.preventDefault(); submitEquation() }} className='flex gap-2 flex-wrap mb-4'>
-        {/* <Input id='eqInput' className='w-full max-w-xs' /> */}
-        <math-field id='eqInput' className='w-full max-w-xs border-2'>2 + 2</math-field>
-        <Button type='submit' color='primary' onClick={submitEquation}>Evaluate</Button>
-      </form>
+      <math-field onKeyDown={(e) => { e.key === 'Enter' && submitEquation() }} id='eqInput' className='w-full max-w-xs border-2'>2 + 2</math-field>
+      <Button type='submit' color='primary' onClick={submitEquation}>Evaluate</Button>
       <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-2xl'>
         <Button color='neutral' onClick={() => appendSymbol('7')}>7</Button>
         <Button color='neutral' onClick={() => appendSymbol('8')}>8</Button>
