@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useContext } from 'react'
 import { Button } from 'react-daisyui'
+import { TreeContext } from '../App'
 import { evaluateNumeric } from '../lib/calculator'
 
 /**
@@ -8,15 +9,22 @@ import { evaluateNumeric } from '../lib/calculator'
  */
 export function Calculator (): React.ReactNode {
   const [result, setResult] = useState('--')
+  const { tree } = useContext(TreeContext)
+  const addToTree = useCallback((inputValue: string) => {
+    console.log('Adding to tree:', inputValue)
+    // if (tree.roots.length === 0) {
+    tree.addNewNode(inputValue)
+    // }
+  }, [tree])
   const submitEquation = useCallback(() => {
     // Placeholder for submission logic
-    console.log('Equation submitted')
     const inputValue = (document.getElementById('eqInput') as HTMLInputElement).value
     console.log('Input Value:', inputValue)
     const outcome = evaluateNumeric(inputValue)
     if (outcome.ok) setResult(outcome.value.toString())
     else setResult('Error: ' + outcome.error)
-  }, [])
+    addToTree(inputValue)
+  }, [addToTree])
   const appendSymbol = useCallback((symbol: string) => {
     const input = document.getElementById('eqInput') as HTMLInputElement
     input.value += symbol
@@ -35,9 +43,11 @@ export function Calculator (): React.ReactNode {
     <div className='p-4'>
       <h1 className='text-2xl font-bold mb-4'>Calculator</h1>
       <p>Creating a new Node</p>
-      <math-field onKeyDown={(e) => { e.key === 'Enter' && submitEquation() }} id='eqInput' className='w-full max-w-xs border-2'>2 + 2</math-field>
-      <Button type='submit' color='primary' onClick={submitEquation}>Evaluate</Button>
-      <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-2xl'>
+      <div className='flex gap-2 glex-wrap mb-4'>
+        <math-field onKeyDown={(e) => { e.key === 'Enter' && submitEquation() }} id='eqInput' className='w-full max-w-xs border-2'>2 + 2</math-field>
+        <Button type='submit' color='primary' onClick={submitEquation}>Evaluate</Button>
+      </div>
+      <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-3xl'>
         <Button color='neutral' onClick={() => appendSymbol('7')}>7</Button>
         <Button color='neutral' onClick={() => appendSymbol('8')}>8</Button>
         <Button color='neutral' onClick={() => appendSymbol('9')}>9</Button>

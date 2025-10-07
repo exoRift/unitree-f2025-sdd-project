@@ -61,7 +61,7 @@ export class Tree {
    * @throws  {Error}                    if a dependency is given that is not present in the tree
    * @returns                            The created node
    */
-  addNewNode (equation: unknown, ...dependencies: TreeNode[]): TreeNode {
+  addNewNode (equation: string, ...dependencies: TreeNode[]): TreeNode {
     for (const dependency of dependencies) {
       if (!this.nodes.has(dependency)) throw new Error(`Dependency with ID "${dependency.id}" not present in tree`)
     }
@@ -146,7 +146,7 @@ export class TreeNode {
   alias?: string
   dependencies = new Set<TreeNode>()
   dependents = new Set<TreeNode>()
-  equation: unknown
+  equation: string
   note?: string
 
   /**
@@ -154,7 +154,7 @@ export class TreeNode {
    * @param id       The ID of the node
    * @param equation The node's equation contents
    */
-  constructor (id: string, equation: unknown) {
+  constructor (id: string, equation: string) {
     this.id = id
     this.equation = equation
   }
