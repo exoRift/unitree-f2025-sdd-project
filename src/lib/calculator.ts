@@ -1,62 +1,86 @@
-import nerdamer from 'nerdamer'
+import type { Tree, TreeNode } from './history'
 
-export type Env = Record<string, number>
-
-export type CalcResult<T> =
-    | { ok: true, value: T }
-    | { ok: false, error: string }
+import { ComputeEngine, type BoxedExpression } from '@cortex-js/compute-engine'
 
 /**
- * Wraps a successful computation result into a CalcResult.
- * @template T - Type of the successful value.
- * @param    value - The computed value.
- * @returns        An object containing the value with ok=true.
+ * The history calculator evaluation context class
  */
-function ok<T> (value: T): CalcResult<T> {
-  return { ok: true, value }
-}
+export class HistoryCalculator {
+  private readonly engine = new ComputeEngine()
 
-/**
- * Wraps an error message into a CalcResult.
- * @param error - A description of the error that occurred.
- * @returns     An object containing the error with ok=false.
- */
-function err (error: string): CalcResult<never> {
-  return { ok: false, error }
-}
+  readonly tree: Tree
 
-/**
- * Attempts to parse and evaluate a numeric expression using nerdamer.
- * @param   {string}             src - The expression to evaluate (e.g. "2+3*4").
- * @returns {CalcResult<number>}
- *                                   - ok=true and a finite numeric value if evaluation succeeds,
- *                                   - ok=false and an error message if evaluation fails or produces NaN/Infinity.
- */
-export function evaluateNumeric (src: string): CalcResult<number> {
-  try {
-    // nerdamer(...).evaluate(env).text() -> string like "14" or "1.75"
-    const textResult = nerdamer(src).evaluate().text()
-    const num = Number(textResult)
-
-    // Guard against NaN / Infinity
-    if (!Number.isFinite(num)) {
-      return err('Non-finite result')
-    }
-    return ok(num)
-  } catch (e: any) {
-    // Normalize any parse/eval error into a simple string
-    return err(String(e?.message ?? e))
+  /**
+   * Construct an evaluation context
+   */
+  constructor (tree: Tree) {
+    this.tree = tree
   }
-}
 
-/**
- * Evaluates a numeric expression and returns its value, throwing if evaluation fails.
- * @param           src - The expression to evaluate (e.g. "10/2").
- * @throws  {Error}     If evaluation fails or produces a non-finite result.
- * @returns             The evaluated numeric value.
- */
-export function calculate (src: string): number {
-  const res = evaluateNumeric(src)
-  if (!res.ok) throw new Error(res.error)
-  return res.value
+  // private injectReferences (expression: BoxedExpression): void {
+  //   // TODO(@exoRift): Investigate collisions
+  //   const symbols = expression.symbols
+  //   for (const id of this.tree.idLookup.keys()) {
+  //     if (symbols.includes(id)) {
+  //       const node = this.tree.idLookup.get(id)!
+  //       const value = this.evaluateNode(node)
+
+  //       expression.subs(['Symbol', id], value)
+  //     }
+  //   }
+
+  //   for (const alias of this.tree.aliasLookup.keys()) {
+
+  //   }
+  // }
+
+  /**
+   * Evaluate a node
+   * @modifies The node's amortized value
+   * @todo Support aliases
+   * @todo Support implicit dependencies
+   * @todo Decide on $ invocation
+   * @param    node The node to evaluate
+   * @returns       The evaluation result
+   */
+  private evaluateNode (node: TreeNode): BoxedExpression {
+    if (node.amortizedValue) return node.amortizedValue
+
+    const symbols = node.parsedEquation.symbols
+    for (const dependency of node.dependencies) {
+      if (!symbols.includes(dependency.id)) this.tree.removeDependency(node, dependency)
+    }
+    for (const symbol of symbols) {
+      const depNode = this.tree.idLookup.get(symbol)
+      if (depNode && !node.dependencies.has(depNode)) {
+        this.tree.addDependency(node, depNode)
+      }
+    }
+
+    const context: Record<string, BoxedExpression> = {}
+    for (const dependency of node.dependencies) {
+      let value = dependency.amortizedValue
+      if (!value) value = this.evaluateNode(dependency)
+      context[dependency.id] = value
+    }
+
+    node.amortizedValue = node.parsedEquation.evaluate({ withArguments: context })
+    // Update dependents, if any
+    for (const dependent of node.dependents) {
+      this.evaluateNode(dependent)
+    }
+    return node.amortizedValue
+  }
+
+  /**
+   * Evaluate a new equation, generating a new history entry
+   * @param equation The equation to evaluate
+   * @returns        The result
+   */
+  evaluateNew (equation: string): BoxedExpression {
+    const parsed = this.engine.parse(equation)
+    const node = this.tree.addNewNode(equation, parsed)
+
+    return this.evaluateNode(node)
+  }
 }

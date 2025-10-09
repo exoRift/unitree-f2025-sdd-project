@@ -1,6 +1,24 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+
 import type { TreeNode } from '../../lib/history'
-import { TreeContext } from '../../App'
+import { useCalculator } from '../../hooks/useCalculator'
+
+/**
+ * This will take in a user inputted equation and make it look better. So fractions actually look
+ * like fractions. Right now it just prints a placeholder text that can't change in any way.
+ * @param props         Contains all information you need
+ * @param props.initial The equation the user typed in and will be formatted in this function
+ * @returns             A <p> tag with the equation of the formatted user equation
+ */
+function UserMadeEquationParser ({ initial }: { initial: string }) : React.ReactNode {
+  return (
+    <p className='text-center opacity-80 mb-2'>
+      {initial}
+      {/* placeholder (equation data type not decided yet) */}
+      {/* {typeof initial === 'undefined' && (<p>Parameter Swap</p>)} */}
+    </p>
+  )
+}
 
 /**
  * This function creates a box on the graph side of the equation that represents
@@ -10,11 +28,11 @@ import { TreeContext } from '../../App'
  */
 export function OneBox ({ data } : { data: TreeNode }) : React.ReactNode {
   const curNode : TreeNode = data
-  const { tree } = useContext(TreeContext)
+  const { tree } = useCalculator()
 
   const displayId : string = data.id
   const displayAlias : string = data.alias === undefined ? 'Equation_' + data.id : data.alias
-  const displayEquation : string = data.equation
+  const displayEquation = data.parsedEquation.toString()
   const displayNote : string = data.note === undefined ? '' : data.note
 
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 })

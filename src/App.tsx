@@ -1,12 +1,13 @@
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import { useRef } from 'react'
 
-import { createContext } from 'react'
 import { Tree } from './lib/history'
-import { useTree } from './hooks/useTree'
 
 import { Toolbar } from './components/Toolbar'
 import { HistoryTree } from './components/HistoryTree'
 import { Calculator } from './components/Calculator'
+import { HistoryCalculator } from './lib/calculator'
+import { HistoryContext } from './hooks/useCalculator'
 
 /**
  * A stylized resize handle
@@ -21,16 +22,18 @@ function ResizeHandle (): React.ReactNode {
   )
 }
 
-export const TreeContext = createContext<{ tree: Tree }>({ tree: new Tree() })
-
 /**
  * The main app
  */
 export default function App (): React.ReactNode {
-  const tree = useTree()
+  const ctx = useRef((() => {
+    const tree = new Tree()
+    const calculator = new HistoryCalculator(tree)
+    return { tree, calculator }
+  })())
 
   return (
-    <TreeContext.Provider value={{ tree }}>
+    <HistoryContext.Provider value={ctx.current}>
       <div className='min-h-screen grid grid-rows-[auto_1fr] grid-cols-1'>
         <Toolbar />
 
@@ -44,6 +47,6 @@ export default function App (): React.ReactNode {
           </Panel>
         </PanelGroup>
       </div>
-    </TreeContext.Provider>
+    </HistoryContext.Provider>
   )
 }
