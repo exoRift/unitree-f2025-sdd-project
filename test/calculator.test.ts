@@ -1,6 +1,7 @@
 import { test, expect } from 'bun:test'
 import { evaluateNumeric } from '../src/lib/calculator'
 
+// TODO(@zach) Redo tests
 test('adds two positive numbers', () => {
   const res = evaluateNumeric('2+3')
   expect(res.ok).toBe(true)
