@@ -4,23 +4,6 @@ import type { TreeNode } from '../../lib/history'
 import { useCalculator } from '../../hooks/useCalculator'
 
 /**
- * This will take in a user inputted equation and make it look better. So fractions actually look
- * like fractions. Right now it just prints a placeholder text that can't change in any way.
- * @param props         Contains all information you need
- * @param props.initial The equation the user typed in and will be formatted in this function
- * @returns             A <p> tag with the equation of the formatted user equation
- */
-function UserMadeEquationParser ({ initial }: { initial: string }) : React.ReactNode {
-  return (
-    <p className='text-center opacity-80 mb-2'>
-      {initial}
-      {/* placeholder (equation data type not decided yet) */}
-      {/* {typeof initial === 'undefined' && (<p>Parameter Swap</p>)} */}
-    </p>
-  )
-}
-
-/**
  * This function creates a box on the graph side of the equation that represents
  * one equation the user typed in.
  * @param props      Contains all information you need

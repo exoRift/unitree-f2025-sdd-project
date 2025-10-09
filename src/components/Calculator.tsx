@@ -1,4 +1,4 @@
-import { useCallback, useState, useContext } from 'react'
+import { useCallback, useState } from 'react'
 import { Button } from 'react-daisyui'
 
 import { useCalculator } from '../hooks/useCalculator'
@@ -11,13 +11,6 @@ export function Calculator (): React.ReactNode {
   const { calculator } = useCalculator()
 
   const [result, setResult] = useState('--')
-  const { tree } = useContext(TreeContext)
-  const addToTree = useCallback((inputValue: string) => {
-    console.log('Adding to tree:', inputValue)
-    // if (tree.roots.length === 0) {
-    tree.addNewNode(inputValue)
-    // }
-  }, [tree])
   const submitEquation = useCallback(() => {
     // Placeholder for submission logic
     const inputValue = (document.getElementById('eqInput') as HTMLInputElement).value
