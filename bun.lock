@@ -4,10 +4,10 @@
     "": {
       "name": "calculatree",
       "dependencies": {
+        "@cortex-js/compute-engine": "^0.30.2",
         "@tailwindcss/vite": "^4.1.12",
         "daisyui": "^5.0.54",
         "mathlive": "^0.107.1",
-        "nerdamer": "^1.1.13",
         "react": "^19.1.1",
         "react-daisyui": "^5.0.5",
         "react-dom": "^19.1.1",
@@ -69,7 +69,7 @@
 
     "@babel/types": ["@babel/types@7.28.2", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.27.1" } }, "sha512-ruv7Ae4J5dUYULmeXw1gmb7rYRz57OWCPM57pHojnLq/3Z1CK2lNSLTCVjxVk1F/TZHwOZZrOWi0ur95BbLxNQ=="],
 
-    "@cortex-js/compute-engine": ["@cortex-js/compute-engine@0.29.1", "", { "dependencies": { "complex-esm": "^2.1.1-esm1", "decimal.js": "^10.4.3" } }, "sha512-bCpaGW+Th+6lrTEDom3mNInfu3hu2N79FpUuqdVyvhE1Np4O447O/1gsgqLAFqVjg58cGN0FCAxf8gXkQNF4CQ=="],
+    "@cortex-js/compute-engine": ["@cortex-js/compute-engine@0.30.2", "", { "dependencies": { "complex-esm": "^2.1.1-esm1", "decimal.js": "^10.6.0" } }, "sha512-Zx+iisk9WWdbxjm8EYsneIBszvjfUs7BHNwf1jBtSINIgfWGpHrTTq9vW0J59iGCFt6bOFxbmWyxNMRSmksHMA=="],
 
     "@emnapi/core": ["@emnapi/core@1.5.0", "", { "dependencies": { "@emnapi/wasi-threads": "1.1.0", "tslib": "^2.4.0" } }, "sha512-sbP8GzB1WDzacS8fgNPpHlp6C9VZe+SJP3F90W9rLemaQj2PzIuTEl1qDOYQf58YIpyjViI24y9aPWCjEzY2cg=="],
 
@@ -715,8 +715,6 @@
 
     "neostandard": ["neostandard@0.12.2", "", { "dependencies": { "@humanwhocodes/gitignore-to-minimatch": "^1.0.2", "@stylistic/eslint-plugin": "2.11.0", "eslint-import-resolver-typescript": "^3.10.1", "eslint-plugin-import-x": "^4.16.1", "eslint-plugin-n": "^17.20.0", "eslint-plugin-promise": "^7.2.1", "eslint-plugin-react": "^7.37.5", "find-up": "^5.0.0", "globals": "^15.15.0", "peowly": "^1.3.2", "typescript-eslint": "^8.35.1" }, "peerDependencies": { "eslint": "^9.0.0" }, "bin": { "neostandard": "cli.mjs" } }, "sha512-VZU8EZpSaNadp3rKEwBhVD1Kw8jE3AftQLkCyOaM7bWemL1LwsYRsBnAmXy2LjG9zO8t66qJdqB7ccwwORyrAg=="],
 
-    "nerdamer": ["nerdamer@1.1.13", "", {}, "sha512-kQGQYd42eQpKDOnU8ZnRKF47c+gK6jVC46eUchrABsovtFruHvsjyjBO32jck8QnpZE5z5R8HQw72hQX9Oq2MQ=="],
-
     "node-releases": ["node-releases@2.0.19", "", {}, "sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw=="],
 
     "object-assign": ["object-assign@4.1.1", "", {}, "sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg=="],
@@ -954,6 +952,8 @@
     "is-bun-module/semver": ["semver@7.7.2", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA=="],
 
     "lru-cache/yallist": ["yallist@3.1.1", "", {}, "sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g=="],
+
+    "mathlive/@cortex-js/compute-engine": ["@cortex-js/compute-engine@0.29.1", "", { "dependencies": { "complex-esm": "^2.1.1-esm1", "decimal.js": "^10.4.3" } }, "sha512-bCpaGW+Th+6lrTEDom3mNInfu3hu2N79FpUuqdVyvhE1Np4O447O/1gsgqLAFqVjg58cGN0FCAxf8gXkQNF4CQ=="],
 
     "micromatch/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
 

@@ -12,10 +12,10 @@
     "update-icons": "curl -L https://github.com/google/material-design-icons/raw/master/variablefont/MaterialSymbolsOutlined%5BFILL,GRAD,opsz,wght%5D.woff2 -o public/fonts/material-symbols.woff2"
   },
   "dependencies": {
+    "@cortex-js/compute-engine": "^0.30.2",
     "@tailwindcss/vite": "^4.1.12",
     "daisyui": "^5.0.54",
     "mathlive": "^0.107.1",
-    "nerdamer": "^1.1.13",
     "react": "^19.1.1",
     "react-daisyui": "^5.0.5",
     "react-dom": "^19.1.1",
