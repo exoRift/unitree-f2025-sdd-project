@@ -38,7 +38,7 @@ export default function App (): React.ReactNode {
         <Toolbar />
 
         <PanelGroup autoSaveId='treecalcsplit' direction='horizontal'>
-          <Panel id='historytree' minSize={15}>
+          <Panel id='historytree' minSize={15} style={{ overflow: 'scroll' }}>
             <HistoryTree />
           </Panel>
           <ResizeHandle />
