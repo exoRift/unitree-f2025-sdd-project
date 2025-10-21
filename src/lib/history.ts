@@ -82,12 +82,11 @@ export class Tree extends EventTarget {
     } else {
       const id = this.generateID()
       node = new TreeNode(id, rawUserEquation, parsedEquation)
+      this.roots.add(node)
     }
 
-    this.roots.add(node)
     this.nodes.add(node)
     this.idLookup.set(node.id, node)
-    this.reorganizeWholeTree()
     this.dispatchEvent(new CustomEvent('mutate'))
     return node
   }
@@ -106,7 +105,6 @@ export class Tree extends EventTarget {
 
     dependent.dependencies.add(dependency)
     dependency.dependents.add(dependent)
-    this.reorganizeWholeTree()
     this.dispatchEvent(new CustomEvent('mutate'))
   }
 
@@ -123,7 +121,6 @@ export class Tree extends EventTarget {
 
     dependent.dependencies.delete(dependency)
     dependency.dependents.delete(dependent)
-    this.reorganizeWholeTree()
     this.dispatchEvent(new CustomEvent('mutate'))
   }
 
@@ -142,7 +139,6 @@ export class Tree extends EventTarget {
     this.idLookup.delete(node.id)
     this.roots.delete(node)
     if (node.alias) this.aliasLookup.delete(node.alias)
-    this.reorganizeWholeTree()
     this.dispatchEvent(new CustomEvent('mutate'))
     return true
   }
@@ -159,99 +155,6 @@ export class Tree extends EventTarget {
     node.alias = alias
     this.aliasLookup.set(alias, node)
     this.dispatchEvent(new CustomEvent('mutate'))
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* ------------------------------------------------------------------ */
-  /* --------Information only for rendering properly as a tree--------- */
-  /* ------------------------------------------------------------------ */
-  /* ------------------------------------------------------------------ */
-
-  /**
-   * This contains a key of '{treeNumber}_{RowNumber}' and a value of an array
-   * of TreeNodes that are in that tree and that rowNumber. Both values start at
-   * 0 and increment by 1 per iteration
-   */
-  organizedTree: Record<string, [TreeNode]> = {}
-  /**
-   * Used to know what TreeNodes were placed inside of organizedTree.
-   * If it was, then its never placed in there again to avoid duplicates
-   */
-  allOrganizedNodes = new Set<TreeNode>()
-
-  /**
-   * Calling this function recalculates all information needed to display
-   * the nodes in a tree like pattern. Call this when a node is removed or
-   * added. Or a new dependency is added/removed
-   */
-  private reorganizeWholeTree (): void {
-    this.organizedTree = {}
-    this.allOrganizedNodes = new Set<TreeNode>()
-    let currentTreeNumber = 0
-    this.roots.forEach((root) => {
-      // only grab root nodes
-      if (root.dependents.size === 0) {
-        this.updateCurrentNodeStatus(root, currentTreeNumber, 0)
-        currentTreeNumber++
-      }
-    })
-  }
-
-  /**
-   * Adds a treenode to a specific part of the tree so it can be rendered properly under the right
-   * tree and row.
-   * @param node       TreeNode you want to add so it can be displayed when the tree is rendered
-   * @param treeNumber The tree number (0-X) where the node will be rendered under
-   * @param rowNumber  The row number (0-X) where the node will be rendered under
-   */
-  private updateCurrentNodeStatus (node: TreeNode, treeNumber : number, rowNumber : number): void {
-    const keyToLookFor = String(treeNumber) + '_' + String(rowNumber)
-    if (!this.allOrganizedNodes.has(node)) {
-      if (!Object.hasOwn(this.organizedTree, keyToLookFor)) {
-        this.organizedTree[keyToLookFor] = [node]
-      } else {
-        this.organizedTree[keyToLookFor].push(node)
-      }
-      this.allOrganizedNodes.add(node)
-    }
-    node.dependencies.forEach((child) => {
-      this.updateCurrentNodeStatus(child, treeNumber, rowNumber + 1)
-    })
-    console.log(this.organizedTree)
-  }
-
-  /**
-   * A function to do as the title suggests
-   * @returns Number of trees the user created (aka number of root nodes)
-   */
-  public getTotalNumberTrees (): number {
-    let toReturn = 0
-    while (Object.hasOwn(this.organizedTree, String(toReturn) + '_0')) toReturn++
-    return toReturn
-  }
-
-  /**
-   * Given a tree number, it gets the height of the tree in number of nodes
-   * @param treeNumber the tree number you want to get info to (0-X)
-   * @returns          Number of rows (aka height) in the tree in number of nodes
-   */
-  public getNumberOfRowsInTree (treeNumber : number): number {
-    let toReturn = 0
-    while (Object.hasOwn(this.organizedTree, String(treeNumber) + '_' + String(toReturn))) toReturn++
-    return toReturn
-  }
-
-  /**
-   * Given a tree number and row number of a tree, you get all the Nodes that need to be
-   * displayed in that tree's row number.
-   * @param treeNumber the tree number you want to get info to (0-X)
-   * @param rowNumber  the row number (aka height away from the tree) you want to get info to (0-X)
-   * @returns          All TreeNodes in that tree and row number
-   */
-  public getAllNodesInTreeAndRow (treeNumber : number, rowNumber : number): TreeNode[] {
-    const keyToLookFor = String(treeNumber) + '_' + String(rowNumber)
-    if (!Object.hasOwn(this.organizedTree, keyToLookFor)) return []
-    return this.organizedTree[keyToLookFor]
   }
 }
 
