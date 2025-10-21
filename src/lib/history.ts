@@ -74,18 +74,19 @@ export class Tree extends EventTarget {
       // If this is a descendant of more than one node, use a new letter
       const letterConstraint = dependencies.length > 1
         ? undefined
-        : dependencies[0].id.match(/^\w+/)![0]
+        : dependencies[0].id.match(/^[A-Z]+/)![0]
 
       const id = this.generateID(letterConstraint)
       node = new TreeNode(id, rawUserEquation, parsedEquation)
+      this.nodes.add(node)
       dependencies.forEach((d) => this.addDependency(node, d))
     } else {
       const id = this.generateID()
       node = new TreeNode(id, rawUserEquation, parsedEquation)
+      this.nodes.add(node)
       this.roots.add(node)
     }
 
-    this.nodes.add(node)
     this.idLookup.set(node.id, node)
     this.dispatchEvent(new CustomEvent('mutate'))
     return node
@@ -172,6 +173,7 @@ class TreeNode {
   /** An externally controllled amortized value */
   amortizedValue?: BoxedExpression
   note?: string
+  lastModified: Date
 
   /**
    * Construct a node
@@ -183,6 +185,7 @@ class TreeNode {
     this.id = id
     this.rawUserEquation = rawUserEquation
     this.parsedEquation = parsedEquation
+    this.lastModified = new Date()
   }
 }
 

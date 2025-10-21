@@ -17,7 +17,7 @@ export function Calculator (): React.ReactNode {
     const inputValue = (document.getElementById('eqInput') as HTMLInputElement).value
     console.log('Input Value:', inputValue)
     // TODO: Send inputValue to backend and get result (@LittleSilver33)
-    const outcome = calculator.evaluateNew(inputValue)
+    const outcome = calculator.evaluateNewExpression(inputValue)
     /* if (outcome.ok)  */setResult(outcome.toString())
     /* else setResult('Error: ' + outcome.error) */
   }, [calculator])
@@ -41,7 +41,7 @@ export function Calculator (): React.ReactNode {
       <p>Creating a new Node</p>
       <form onSubmit={(e) => { e.preventDefault(); submitEquation() }} className='flex gap-2 flex-wrap mb-4'>
         {/* <Input id='eqInput' className='w-full max-w-xs' /> */}
-        <math-field onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitEquation() } }} id='eqInput' className='w-full max-w-xs border-2'>2 + 2</math-field>
+        <math-field onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitEquation() } }} id='eqInput' className='w-full max-w-xs border-2' />
         <Button type='submit' color='primary'>Evaluate</Button>
       </form>
       <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-2xl'>
