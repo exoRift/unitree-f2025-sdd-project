@@ -15,7 +15,7 @@ export function Toolbar (): React.ReactNode {
   const [horizontalOn, setHorizonalOn] = useState(false)
   return (
     <header>
-      <div className='lightBg toolbarFont flex flex-row text-white font-bold items-center w-full rounded'>
+      <div className='mainBg toolbarFont flex flex-row text-white font-bold items-center w-full rounded'>
         <img src={logo} alt='logo' className='max-w-14 max-h-14 aspect-auto ml-8' />
         <p className='font-bold text-xl'>Unitree</p>
         <div className='flex flex-row justify-between w-full ml-180 mr-18'>
@@ -36,7 +36,7 @@ export function Toolbar (): React.ReactNode {
 
       {/* Pop-up (not functional) */}
       {popupOpen && (
-        <div className='fixed inset-26 inset-x-120 toolbarFont lightBg text-white rounded flex flex-col items-center justify-center z-50'>
+        <div className='fixed inset-26 inset-x-120 toolbarFont mainBg text-white rounded flex flex-col items-center justify-center z-50'>
           <div className='justify-items-between h-1/2 w-1/2'>
             <h1 className='mb-5 text-xl font-bold'>Settings</h1>
             {/* Checkboxes (not functional) */}
