@@ -1,12 +1,15 @@
 import { useCallback, useState } from 'react'
-import { Button, Input } from 'react-daisyui'
-import { evaluateNumeric } from '../lib/calculator'
+import { Button } from 'react-daisyui'
+
+import { useCalculator } from '../hooks/useCalculator'
 
 /**
  * The calculator component. Handles the math input and eval
  * TODO: Add instructions into the margins
  */
 export function Calculator (): React.ReactNode {
+  const { calculator } = useCalculator()
+
   const [result, setResult] = useState('--')
   const submitEquation = useCallback(() => {
     // Placeholder for submission logic
@@ -14,10 +17,10 @@ export function Calculator (): React.ReactNode {
     const inputValue = (document.getElementById('eqInput') as HTMLInputElement).value
     console.log('Input Value:', inputValue)
     // TODO: Send inputValue to backend and get result (@LittleSilver33)
-    const outcome = evaluateNumeric(inputValue)
-    if (outcome.ok) setResult(outcome.value.toString())
-    else setResult('Error: ' + outcome.error)
-  }, [])
+    const outcome = calculator.evaluateNew(inputValue)
+    /* if (outcome.ok)  */setResult(outcome.toString())
+    /* else setResult('Error: ' + outcome.error) */
+  }, [calculator])
   const appendSymbol = useCallback((symbol: string) => {
     const input = document.getElementById('eqInput') as HTMLInputElement
     input.value += symbol
@@ -37,8 +40,9 @@ export function Calculator (): React.ReactNode {
       <h1 className='text-2xl font-bold mb-4'>Calculator</h1>
       <p>Creating a new Node</p>
       <form onSubmit={(e) => { e.preventDefault(); submitEquation() }} className='flex gap-2 flex-wrap mb-4'>
-        <Input id='eqInput' className='w-full max-w-xs' />
-        <Button type='submit' color='primary' onClick={submitEquation}>Evaluate</Button>
+        {/* <Input id='eqInput' className='w-full max-w-xs' /> */}
+        <math-field onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitEquation() } }} id='eqInput' className='w-full max-w-xs border-2'>2 + 2</math-field>
+        <Button type='submit' color='primary'>Evaluate</Button>
       </form>
       <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-2xl'>
         <Button color='neutral' onClick={() => appendSymbol('7')}>7</Button>
