@@ -16,7 +16,7 @@ export class HistoryCalculator {
    * @returns        The sanitized equation
    */
   static sanitize (equation: string): string {
-    return equation.replaceAll(/\$(.+?)(?=\W)/g, (_, g) => `\\\\mathrm{${g}} `)
+    return equation.replaceAll(/\\\$(\w+)(?=\W|$)/g, (_, g) => `\\mathrm{${g}}`)
   }
 
   /**
@@ -67,7 +67,7 @@ export class HistoryCalculator {
     }
 
     // TODO: Prevent assignment
-    return [parsed.evaluate(), dependencies]
+    return [parsed.evaluate({ withArguments: context }), dependencies]
   }
 
   /**
@@ -99,6 +99,8 @@ export class HistoryCalculator {
   evaluateNewExpression (equation: string): BoxedExpression {
     const sanitized = HistoryCalculator.sanitize(equation)
     const parsed = this.engine.parse(sanitized)
+    console.debug('santized:', JSON.stringify(sanitized))
+    console.debug('parsed:', parsed.json)
 
     const [value, dependencies] = this.evaluateExpression(parsed)
     const node = this.tree.addNewNode(equation, parsed, ...dependencies)

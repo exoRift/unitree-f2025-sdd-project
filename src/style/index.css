@@ -5,3 +5,7 @@
 @plugin "daisyui" {
   themes: emerald --default;
 }
+
+.modal-backdrop button {
+  @apply cursor-default;
+}

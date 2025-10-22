@@ -4,7 +4,7 @@
 
 import type { BoxedExpression } from '@cortex-js/compute-engine'
 
-const A_CODE = 'A'.charCodeAt(0)
+const A_CODE = 'a'.charCodeAt(0)
 
 /**
  * Representation of a history tree of nodes with dependencies
@@ -74,7 +74,7 @@ export class Tree extends EventTarget {
       // If this is a descendant of more than one node, use a new letter
       const letterConstraint = dependencies.length > 1
         ? undefined
-        : dependencies[0].id.match(/^[A-Z]+/)![0]
+        : dependencies[0].id.match(/^[a-z]+/)![0]
 
       const id = this.generateID(letterConstraint)
       node = new TreeNode(id, rawUserEquation, parsedEquation)
@@ -150,11 +150,25 @@ export class Tree extends EventTarget {
    * @param          alias The alias
    * @throws {Error}       if node is not present in the tree
    */
-  setAlias (node: TreeNode, alias: string): void {
-    if (!alias) return
+  setAlias (node: TreeNode, alias: string | undefined): void {
+    if (alias === '') return
     if (!this.nodes.has(node)) throw new Error('Node not present in tree')
+    if (alias) this.aliasLookup.set(alias, node)
+    else if (node.alias) this.aliasLookup.delete(node.alias)
     node.alias = alias
-    this.aliasLookup.set(alias, node)
+    this.dispatchEvent(new CustomEvent('mutate'))
+  }
+
+  /**
+   * Add a note for a node
+   * @param          node The node
+   * @param          note The note
+   * @throws {Error}      if node is not present in the tree
+   */
+  setNote (node: TreeNode, note: string | undefined): void {
+    if (note === '') return
+    if (!this.nodes.has(node)) throw new Error('Node not present in tree')
+    node.note = note
     this.dispatchEvent(new CustomEvent('mutate'))
   }
 }
