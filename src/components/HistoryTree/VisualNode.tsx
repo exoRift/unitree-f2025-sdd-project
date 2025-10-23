@@ -168,7 +168,7 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
 
           return (
             <Fragment key={n.id}>
-              <Xarrow divContainerStyle={{ zIndex: -1 }} start={`node_${node.id}`} end={`node_${n.id}`} headSize={3} color={isPrimary ? 'var(--color-secondary)' : 'var(--color-accent)'} />
+              <Xarrow divContainerStyle={{ zIndex: -1 }} start={`node_${node.id}`} end={`node_${n.id}`} path='straight' headSize={3} color={isPrimary ? 'var(--color-secondary)' : 'var(--color-accent)'} />
 
               {isPrimary && <VisualNode node={n} />}
             </Fragment>
