@@ -1,12 +1,9 @@
-import { useState } from 'react'
-
-import logo from '../images/unitree_logo.png'
-
 /**
  * The top toolbar component. User customization, workspacing, and other settings are managed here
  */
-import React, { useState } from 'react'
-import logo from '../images/unitree_logo_noWords.png'
+import { useState } from 'react'
+
+import logo from '../images/unitree_logo.png'
 
 /**
  * Toolbar includes the logo, save button, restart button, and settings button equipped with the

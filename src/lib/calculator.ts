@@ -26,29 +26,33 @@ export class HistoryCalculator {
     this.tree = tree
   }
 
-  // private injectReferences (expression: BoxedExpression): void {
-  //   // TODO(@exoRift): Investigate collisions
-  //   const symbols = expression.symbols
-  //   for (const id of this.tree.idLookup.keys()) {
-  //     if (symbols.includes(id)) {
-  //       const node = this.tree.idLookup.get(id)!
-  //       const value = this.evaluateNode(node)
+  /**
+   * Evaluate a node
+   * @modifies The node's amortized value
+   * @param    node The node to evaluate
+   * @returns       The evaluation result
+   */
+  private refreshNode (node: TreeNode): BoxedExpression {
+    const [value, dependencies] = this.evaluateParsedExpression(node.parsedEquation)
+    node.amortizedValue = value
 
-  //       expression.subs(['Symbol', id], value)
-  //     }
-  //   }
+    const missingDeps = node.dependencies.difference(dependencies)
+    for (const missingDep of missingDeps) this.tree.removeDependency(node, missingDep)
 
-  //   for (const alias of this.tree.aliasLookup.keys()) {
+    const newDeps = dependencies.difference(node.dependencies)
+    for (const newDep of newDeps) this.tree.addDependency(node, newDep)
 
-  //   }
-  // }
+    // Update dependents, if any
+    for (const dependent of node.dependents) this.refreshNode(dependent)
+    return node.amortizedValue
+  }
 
   /**
    * Evaluate an expression an return its value and dependencies
    * @param parsed The parsed expression
    * @returns      [value, dependencies]
    */
-  private evaluateExpression (parsed: BoxedExpression): [value: BoxedExpression, dependencies: Set<TreeNode>] {
+  private evaluateParsedExpression (parsed: BoxedExpression): [value: BoxedExpression, dependencies: Set<TreeNode>] {
     const dependencies = new Set<TreeNode>()
 
     const symbols = parsed.symbols
@@ -71,41 +75,30 @@ export class HistoryCalculator {
   }
 
   /**
-   * Evaluate a node
-   * @modifies The node's amortized value
-   * @param    node The node to evaluate
-   * @returns       The evaluation result
-   */
-  private refreshNode (node: TreeNode): BoxedExpression {
-    const [value, dependencies] = this.evaluateExpression(node.parsedEquation)
-    node.amortizedValue = value
-
-    const missingDeps = node.dependencies.difference(dependencies)
-    for (const missingDep of missingDeps) this.tree.removeDependency(node, missingDep)
-
-    const newDeps = dependencies.difference(node.dependencies)
-    for (const newDep of newDeps) this.tree.addDependency(node, newDep)
-
-    // Update dependents, if any
-    for (const dependent of node.dependents) this.refreshNode(dependent)
-    return node.amortizedValue
-  }
-
-  /**
-   * Evaluate a new equation, generating a new history entry
+   * Evaluate an expression, returning its parsed expression, value, and dependencies
    * @param equation The equation to evaluate
    * @returns        The result
    */
-  evaluateNewExpression (equation: string): BoxedExpression {
+  evaluateExpression (equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
     const sanitized = HistoryCalculator.sanitize(equation)
     const parsed = this.engine.parse(sanitized)
-    console.debug('santized:', JSON.stringify(sanitized))
-    console.debug('parsed:', parsed.json)
 
-    const [value, dependencies] = this.evaluateExpression(parsed)
-    const node = this.tree.addNewNode(equation, parsed, ...dependencies)
-    node.amortizedValue = value
+    return [parsed, ...this.evaluateParsedExpression(parsed)]
+  }
 
-    return node.amortizedValue
+  /**
+   * Evaluate an expression and save it in history
+   * @param equation The equation to evaluate
+   * @returns        The created node
+   */
+  saveNewExpression (equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
+    const [parsed, value, dependencies] = this.evaluateExpression(equation)
+
+    if (!value.errors.length) {
+      const node = this.tree.addNewNode(equation, parsed, ...dependencies)
+      node.amortizedValue = value
+    }
+
+    return [parsed, value, dependencies]
   }
 }

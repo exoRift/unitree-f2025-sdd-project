@@ -1,13 +1,12 @@
-import { Fragment, useCallback, useEffect, useRef } from 'react'
+import { Fragment, useCallback, useEffect } from 'react'
+import type { MathfieldElement } from 'mathlive'
+import { twMerge } from 'tailwind-merge'
 import Xarrow from 'react-xarrows'
 
 import type { TreeNode } from '../../lib/history'
+import { useCalculator } from '../../hooks/useCalculator'
 
 import { Button, Card, Dropdown, Input, Modal } from 'react-daisyui'
-import type { MathfieldElement, MathfieldElementAttributes } from 'mathlive'
-import { useCalculator } from '../../hooks/useCalculator'
-import type { BoxedExpression } from '@cortex-js/compute-engine'
-import { twMerge } from 'tailwind-merge'
 
 /**
  * Determine if a dependency is the primary dependency of a dependent
@@ -30,7 +29,13 @@ function isPrimaryDependency (dependency: TreeNode, dependent: TreeNode): boolea
   return dependency === mostRecent
 }
 
-function DynamicMathfield ({ node, className, ...props }: { node: TreeNode } & React.ComponentProps<'math-field'>): React.ReactNode {
+/**
+ * A field that displays a node's equation and answer
+ * @param props
+ * @param props.node      The node
+ * @param props.className
+ */
+export function DynamicMathfield ({ node, className, ...props }: { node: TreeNode } & React.ComponentProps<'math-field'>): React.ReactNode {
   return (
     <math-field {...props} read-only className={twMerge('inline bg-transparent text-neutral-content', className)}>
       {node.rawUserEquation}
@@ -73,13 +78,13 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
       root.classList.toggle('ring-yellow-500', true)
       for (const dependency of node.dependencies) {
         const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-4', true)
+        elem.classList.toggle('ring-2', true)
         elem.classList.toggle('ring-blue-500', true)
       }
 
       for (const dependency of node.dependents) {
         const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-4', true)
+        elem.classList.toggle('ring-2', true)
         elem.classList.toggle('ring-green-500', true)
       }
     }, { passive: true, signal: aborter.signal })
@@ -89,13 +94,13 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
       root.classList.toggle('ring-yellow-500', false)
       for (const dependency of node.dependencies) {
         const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-4', false)
+        elem.classList.toggle('ring-2', false)
         elem.classList.toggle('ring-blue-500', false)
       }
 
       for (const dependency of node.dependents) {
         const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-4', false)
+        elem.classList.toggle('ring-2', false)
         elem.classList.toggle('ring-green-500', false)
       }
     }, { passive: true, signal: aborter.signal })
