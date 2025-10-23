@@ -16,8 +16,10 @@ export const HistoryContext = createContext((() => {
  * @returns A tree
  */
 export function useCalculator (): { tree: Tree, calculator: HistoryCalculator } {
-  const [, setSignal] = useState(0)
+  const [signal, setSignal] = useState(0)
   const ctx = useContext(HistoryContext)
+
+  console.debug('signal', signal)
 
   useEffect(() => {
     const aborter = new AbortController()
