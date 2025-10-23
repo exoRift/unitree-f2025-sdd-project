@@ -19,6 +19,7 @@ export function Calculator (): React.ReactNode {
   const submitEquation = useCallback((e?: React.FormEvent<HTMLFormElement>) => {
     e?.preventDefault()
     const input = document.getElementById('eqInput') as MathfieldElement
+    if (!input.value) return
     const [, outcome] = calculator.saveNewExpression(input.value)
 
     if (outcome.isValid) {

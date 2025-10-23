@@ -16,7 +16,7 @@ export class HistoryCalculator {
    * @returns        The sanitized equation
    */
   static sanitize (equation: string): string {
-    return equation.replaceAll(/\\\$(\w+)(?=\W|$)/g, (_, g) => `\\mathrm{${g}}`)
+    return equation.replaceAll(/\\\$(\w+)(?=\W|$)/g, (_, g) => `\\mathrm{${g.toLowerCase()}}`)
   }
 
   /**
@@ -57,11 +57,19 @@ export class HistoryCalculator {
 
     const symbols = parsed.symbols
     for (const symbol of symbols) {
+      if (symbol === 'ans' && this.tree.lastCreatedNode) dependencies.add(this.tree.lastCreatedNode)
+
       const depNode = this.tree.idLookup.get(symbol) ?? this.tree.aliasLookup.get(symbol)
       if (depNode) dependencies.add(depNode)
     }
 
     const context: Record<string, BoxedExpression> = {}
+
+    if (this.tree.lastCreatedNode) {
+      const value = this.tree.lastCreatedNode.amortizedValue ?? this.refreshNode(this.tree.lastCreatedNode)
+      context.ans = value
+    }
+
     for (const dependency of dependencies) {
       let value = dependency.amortizedValue
       if (!value) value = this.refreshNode(dependency)

@@ -115,7 +115,7 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
     }
 
     const data = new FormData(e.currentTarget)
-    const alias = data.get('alias') as string
+    const alias = (data.get('alias') as string).toLowerCase()
 
     tree.setAlias(node, alias)
   }, [tree, node])
@@ -183,7 +183,18 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
             <h2 className='strong'>{node.id}</h2>
           </Modal.Header>
           <Modal.Body className='flex flex-col-reverse gap-4'>
-            <Input name='alias' autoFocus defaultValue={node.alias} placeholder='Alias...' className='w-full' />
+            <Input
+              onChange={(e) => {
+                if (e.currentTarget.value.toLowerCase() === 'ans') e.currentTarget.setCustomValidity('Alias cannot be "ans"')
+                else if (e.currentTarget.value.match(/[^A-Za-z]/)) e.currentTarget.setCustomValidity('Alias must only contain letters')
+                else e.currentTarget.setCustomValidity('')
+              }}
+              name='alias'
+              autoFocus
+              defaultValue={node.alias}
+              placeholder='Alias...'
+              className='w-full lowercase'
+            />
 
             <Card className='bg-neutral p-4'>
               <DynamicMathfield node={node} />
