@@ -3,15 +3,6 @@ import type { BoxedExpression } from '@cortex-js/compute-engine'
 import type { Tree, TreeNode } from '../src/lib/history'
 import { test, expect } from 'bun:test'
 
-/**
- * A minimal subset of {@link Tree} required by {@link HistoryCalculator}.
- * We only include members actually used by the calculator:
- * - idLookup
- * - aliasLookup
- * - addNewNode
- * - addDependency
- * - removeDependency
- */
 type MinimalTree = Pick<
   Tree,
   'idLookup' | 'aliasLookup' | 'addNewNode' | 'addDependency' | 'removeDependency'
@@ -22,17 +13,15 @@ type MinimalTree = Pick<
  * Intentionally does not include the full {@link Tree} interface.
  */
 class StubTree implements MinimalTree {
-  /** Lookup table for nodes by identifier. */
   readonly idLookup = new Map<string, TreeNode>()
 
-  /** Lookup table for aliases mapped to nodes. */
   readonly aliasLookup = new Map<string, TreeNode>()
 
   /**
-   * Create and register a minimal {@link TreeNode}.
-   * @param   {string}          _equation      - Raw equation text.
-   * @param   {BoxedExpression} parsedEquation - Compute Engine parsed form.
-   * @returns {TreeNode}                       A node suitable for evaluation by the calculator.
+   * Create and register a minimal {@link TreeNode}
+   * @param   {string}          _equation      - Raw user equation text (ignored by stub)
+   * @param   {BoxedExpression} parsedEquation - Compute Engine parsed form
+   * @returns {TreeNode}                       Node suitable for calculator evaluation
    */
   addNewNode (_equation: string, parsedEquation: BoxedExpression): TreeNode {
     const node: TreeNode = {
@@ -41,37 +30,40 @@ class StubTree implements MinimalTree {
       amortizedValue: undefined,
       dependencies: new Set<TreeNode>(),
       dependents: new Set<TreeNode>()
-    } as TreeNode // cast keeps TS happy if there are more fields in real TreeNode
+    } as TreeNode
     this.idLookup.set(node.id, node)
     return node
   }
 
   /**
-   * No-op: present to satisfy the minimal surface used by the calculator.
-   * @param   {TreeNode} _node       - Dependent node.
-   * @param   {TreeNode} _dependency - Dependency node.
+   * Add dependency stub — no-op used to satisfy the calculator surface
+   * @param   {TreeNode} _node       - The dependent node (ignored)
+   * @param   {TreeNode} _dependency - The dependency node (ignored)
    * @returns {void}
    */
   addDependency (_node: TreeNode, _dependency: TreeNode): void {
-    // Intentionally empty for unit tests
+    // no-op
   }
 
   /**
-   * No-op: present to satisfy the minimal surface used by the calculator.
-   * @param   {TreeNode} _node       - Dependent node.
-   * @param   {TreeNode} _dependency - Dependency node.
+   * Remove dependency stub — no-op used to satisfy the calculator surface
+   * @param   {TreeNode} _node       - The dependent node (ignored)
+   * @param   {TreeNode} _dependency - The dependency node (ignored)
    * @returns {void}
    */
   removeDependency (_node: TreeNode, _dependency: TreeNode): void {
-    // Intentionally empty for unit tests
+    // no-op
   }
 }
 
 /**
- * Convert a Compute Engine {@link BoxedExpression} to a number for assertions.
- * @param   {BoxedExpression} expr - The result expression.
- * @returns {number}               Numeric value of the expression.
- * @throws  {TypeError}            If coercion fails.
+ * Convert a Compute Engine {@link BoxedExpression} to a primitive number for assertions.
+ *
+ * Tries `N()` if available, then falls back to `valueOf()` and finally a numeric parse
+ * of `toString()`. This mirrors the loose numeric semantics in tests.
+ * @param   {BoxedExpression} expr - The expression to coerce
+ * @returns {number}               The numeric value of the expression
+ * @throws  {TypeError}            If the expression cannot be coerced to a number
  */
 function num (expr: BoxedExpression): number {
   const hasN = typeof (expr as any).N === 'function'
@@ -85,10 +77,8 @@ function num (expr: BoxedExpression): number {
 }
 
 /**
- * Factory for a calculator bound to a minimal tree stub.
- * We cast the stub to {@link Tree} at the boundary to satisfy the constructor
- * while keeping the stub lean.
- * @returns {HistoryCalculator} Calculator ready for evaluateNew().
+ * Factory for a {@link HistoryCalculator} bound to a minimal Tree stub.
+ * @returns {HistoryCalculator} A calculator instance backed by a stubbed tree
  */
 function calc (): HistoryCalculator {
   const tree = new StubTree() as unknown as Tree
@@ -96,33 +86,41 @@ function calc (): HistoryCalculator {
 }
 
 test('Adds two positive numbers', () => {
-  expect(num(calc().evaluateNew('2+3'))).toBe(5)
+  const [, v] = calc().evaluateExpression('2+3')
+  expect(num(v)).toBe(5)
 })
 
 test('Handles subtraction with negatives', () => {
-  expect(num(calc().evaluateNew('-7-3'))).toBe(-10)
+  const [, v] = calc().evaluateExpression('-7-3')
+  expect(num(v)).toBe(-10)
 })
 
 test('Handles multiplication', () => {
-  expect(num(calc().evaluateNew('4*5'))).toBe(20)
+  const [, v] = calc().evaluateExpression('4*5')
+  expect(num(v)).toBe(20)
 })
 
 test('Handles division', () => {
-  expect(num(calc().evaluateNew('20/4'))).toBe(5)
+  const [, v] = calc().evaluateExpression('20/4')
+  expect(num(v)).toBe(5)
 })
 
 test('Respects PEMDAS', () => {
-  expect(num(calc().evaluateNew('2 + 3 * 4'))).toBe(14)
+  const [, v] = calc().evaluateExpression('2 + 3 * 4')
+  expect(num(v)).toBe(14)
 })
 
 test('Handles parentheses', () => {
-  expect(num(calc().evaluateNew('(2 + 3) * 4'))).toBe(20)
+  const [, v] = calc().evaluateExpression('(2 + 3) * 4')
+  expect(num(v)).toBe(20)
 })
 
 test('Handles nested parentheses', () => {
-  expect(num(calc().evaluateNew('((1 + 2) * (3 + 4))'))).toBe(21)
+  const [, v] = calc().evaluateExpression('((1 + 2) * (3 + 4))')
+  expect(num(v)).toBe(21)
 })
 
 test('Handles decimals', () => {
-  expect(num(calc().evaluateNew('0.5 + 1.25'))).toBeCloseTo(1.75)
+  const [, v] = calc().evaluateExpression('0.5 + 1.25')
+  expect(num(v)).toBeCloseTo(1.75)
 })
