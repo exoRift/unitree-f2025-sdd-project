@@ -1,10 +1,11 @@
 import { useCallback, useState, type FormEvent } from 'react'
 import { Button } from 'react-daisyui'
+import type { BoxedExpression } from '@cortex-js/compute-engine'
 
 import { useCalculator } from '../hooks/useCalculator'
+
 import type { MathfieldElement } from 'mathlive'
 import { DynamicMathfield } from './HistoryTree/VisualNode'
-import type { BoxedExpression } from '@cortex-js/compute-engine'
 
 /**
  * The calculator component. Handles the math input and eval
@@ -33,7 +34,17 @@ export function Calculator (): React.ReactNode {
 
   const negate = useCallback(() => {
     const input = document.getElementById('eqInput') as MathfieldElement
-    input.insert('-', { insertionMode: 'insertBefore', focus: true })
+    let value = input.value
+    let position = input.selection.ranges[0]?.[0] ?? 1
+    do {
+      --position
+    } while (position >= 0 && value[position].match(/[0-9.]/))
+
+    if (value[Math.max(0, position)] === '-') value = value.slice(0, position) + value.slice(position + 1, value.length)
+    else value = value.slice(0, position + 1) + '-' + value.slice(position + 1, value.length)
+
+    input.setValue(value)
+    input.focus()
   }, [])
 
   const updatePreview = useCallback((e: FormEvent<MathfieldElement>) => {
