@@ -20,11 +20,10 @@ export function Calculator (): React.ReactNode {
     const input = document.getElementById('eqInput') as MathfieldElement
     const [, outcome] = calculator.saveNewExpression(input.value)
 
-    if (outcome.isValid) setErrors(undefined)
-    else setErrors(outcome.errors)
-
-    // /* if (outcome.ok)  */setResult(outcome.toString())
-    /* else setResult('Error: ' + outcome.error) */
+    if (outcome.isValid) {
+      setErrors(undefined)
+      input.setValue('')
+    } else setErrors(outcome.errors)
   }, [calculator])
 
   const appendSymbol = useCallback((symbol: string) => {
@@ -57,25 +56,25 @@ export function Calculator (): React.ReactNode {
 
         <div className='flex gap-4 justify-between'>
           <Button type='submit' color='primary'>Evaluate & Save</Button>
+
+          {errors
+            ? (
+              <p className='text-error' key='result'>
+                {errors.map((e, i) => (
+                  <span key={i} className='not-last:after:content-["_|_"] after:text-base-content/50 after:font-bold'>{e.toString()}</span>
+                ))}
+              </p>
+            )
+            : tree.lastCreatedNode
+              ? (
+                <p className='opacity-60 inline-flex items-start' key='result'>
+                  <math-field read-only>{'\\text{Last equation: }'}</math-field>
+                  <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} />
+                </p>
+              )
+              : null}
         </div>
       </form>
-
-      {errors
-        ? (
-          <p className='text-sm text-error'>
-            {errors.map((e, i) => (
-              <span key={i} className='not-last:after:content-["_|_"] after:text-base-content/50 after:font-bold'>{e.toString()}</span>
-            ))}
-          </p>
-        )
-        : tree.lastCreatedNode
-          ? (
-            <p className='opacity-60 inline-flex items-start'>
-              <math-field read-only>{'\\text{Last equation: }'}</math-field>
-              <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} />
-            </p>
-          )
-          : null}
 
       <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-2xl'>
         <Button color='neutral' onClick={() => appendSymbol('7')}>7</Button>
