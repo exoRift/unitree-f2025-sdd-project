@@ -79,7 +79,7 @@ export class HistoryCalculator {
     }
 
     // TODO: Prevent assignment
-    return [parsed.evaluate({ withArguments: context }), dependencies]
+    return [parsed.subs(context).evaluate(), dependencies]
   }
 
   /**
@@ -100,6 +100,19 @@ export class HistoryCalculator {
    * @returns        [parsed equation, value, dependencies]
    */
   saveNewExpression (equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
+    if (this.tree.lastCreatedNode) {
+      const numerical = (this.tree.lastCreatedNode.amortizedValue ?? this.refreshNode(this.tree.lastCreatedNode)).N()
+
+      if (numerical.isNumberLiteral) {
+        const replaced = equation.replaceAll(numerical.toLatex(), `\\$${this.tree.lastCreatedNode.id}`)
+
+        if (replaced !== equation) {
+          equation = replaced
+          this.tree.dispatchEvent(new CustomEvent('implicit'))
+        }
+      }
+    }
+
     const [parsed, value, dependencies] = this.evaluateExpression(equation)
 
     if (!value.errors.length) {
