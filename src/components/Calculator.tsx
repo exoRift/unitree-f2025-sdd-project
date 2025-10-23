@@ -53,7 +53,7 @@ export function Calculator (): React.ReactNode {
 
     const [, outcome] = calculator.evaluateExpression(e.currentTarget.value)
 
-    preview.setValue(e.currentTarget.value ? outcome.toLatex() : '')
+    preview.setValue(e.currentTarget.value ? outcome.N().toLatex() : '')
   }, [calculator])
 
   return (
@@ -81,7 +81,7 @@ export function Calculator (): React.ReactNode {
               ? (
                 <p className='opacity-60 inline-flex items-start' key='result'>
                   <math-field read-only>{'\\text{Last equation: }'}</math-field>
-                  <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} />
+                  <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} showNumeric />
                 </p>
               )
               : null}
