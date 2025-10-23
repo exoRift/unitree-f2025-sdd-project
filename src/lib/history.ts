@@ -18,6 +18,8 @@ export class Tree extends EventTarget {
   idLookup = new Map<string, TreeNode>()
   aliasLookup = new Map<string, TreeNode>()
 
+  lastCreatedNode?: TreeNode
+
   /**
    * Convert a number into a series of letters \
    * 0 -> A \
@@ -88,6 +90,7 @@ export class Tree extends EventTarget {
     }
 
     this.idLookup.set(node.id, node)
+    this.lastCreatedNode = node
     this.dispatchEvent(new CustomEvent('mutate'))
     return node
   }
@@ -140,6 +143,7 @@ export class Tree extends EventTarget {
     this.idLookup.delete(node.id)
     this.roots.delete(node)
     if (node.alias) this.aliasLookup.delete(node.alias)
+    if (node === this.lastCreatedNode) this.lastCreatedNode = undefined
     this.dispatchEvent(new CustomEvent('mutate'))
     return true
   }

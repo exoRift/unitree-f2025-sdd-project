@@ -1,5 +1,3 @@
-import { useEffect } from 'react'
-
 import { useCalculator } from '../hooks/useCalculator'
 
 import { VisualNode } from './HistoryTree/VisualNode'
@@ -8,7 +6,7 @@ import { VisualNode } from './HistoryTree/VisualNode'
  * The history tree component. Handles the history
  */
 export function HistoryTree (): React.ReactNode {
-  const { tree, calculator } = useCalculator()
+  const { tree } = useCalculator()
 
   return (
     <div className='h-full flex flex-col'>
