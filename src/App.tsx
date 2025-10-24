@@ -1,5 +1,6 @@
+import { SettingsProvider, useSettings } from './hooks/useSettings'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 
 import { Tree } from './lib/history'
 
@@ -23,6 +24,33 @@ function ResizeHandle (): React.ReactNode {
 }
 
 /**
+ * Contains application components
+ * @returns Unitree layout equipped with the Toolbar, History-Tree, resizable panel divider, and
+ * Calculator
+ */
+function AppContext (): React.ReactNode {
+  const { horizontalOn, setHorizontalOn } = useSettings()
+
+  return (
+    <div className='min-h-screen grid grid-rows-[auto_1fr] grid-cols-1'>
+      <Toolbar horizontalOn={horizontalOn} setHorizontalOn={setHorizontalOn} />
+
+      <PanelGroup autoSaveId='treecalcsplit' direction={horizontalOn ? 'vertical' : 'horizontal'}>
+        <Panel id='historytree' minSize={15}>
+          <HistoryTree />
+        </Panel>
+        <ResizeHandle />
+        <Panel id='calculator' minSize={40}>
+          <div className='flex-1 h-full overflow-auto'>
+            <Calculator />
+          </div>
+        </Panel>
+      </PanelGroup>
+    </div>
+  )
+}
+
+/**
  * The main app
  */
 export default function App (): React.ReactNode {
@@ -32,25 +60,11 @@ export default function App (): React.ReactNode {
     return { tree, calculator }
   })())
 
-  const [horizontalOn, setHorizontalOn] = useState(false)
-
   return (
     <HistoryContext.Provider value={ctx.current}>
-      <div className='min-h-screen grid grid-rows-[auto_1fr] grid-cols-1'>
-        <Toolbar horizontalOn={horizontalOn} setHorizontalOn={setHorizontalOn} />
-
-        <PanelGroup autoSaveId='treecalcsplit' direction={horizontalOn ? 'vertical' : 'horizontal'}>
-          <Panel id='historytree' minSize={15}>
-            <HistoryTree />
-          </Panel>
-          <ResizeHandle />
-          <Panel id='calculator' minSize={40}>
-            <div className='flex-1 h-full overflow-auto'>
-              <Calculator />
-            </div>
-          </Panel>
-        </PanelGroup>
-      </div>
+      <SettingsProvider>
+        <AppContext />
+      </SettingsProvider>
     </HistoryContext.Provider>
   )
 }

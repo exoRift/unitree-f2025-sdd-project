@@ -1,21 +1,19 @@
 /**
  * The top toolbar component. User customization, workspacing, and other settings are managed here
  */
+import { useSettings } from '../hooks/useSettings'
 import React, { useState } from 'react'
 import logo from '../images/unitree_logo_noWords.png'
 
-interface dividerDirection {
-  horizontalOn: boolean
-  setHorizontalOn: (val: boolean) => void
-}
 /**
  * Toolbar includes the logo, save button, restart button, and settings button equipped with the
  * settings pop-up.
  * @returns toolbar component
  */
-export function Toolbar ({ horizontalOn, setHorizontalOn }: dividerDirection): React.ReactNode {
+export function Toolbar (): React.ReactNode {
   const [popupOpen, setPopupIsOpen] = useState(false)
-  const [darkModeOn, setDarkModeOn] = useState(false)
+  const { horizontalOn, setHorizontalOn, darkModeOn, setDarkModeOn } = useSettings()
+
   return (
     <header>
       <div className='mainBg toolbarFont flex flex-row text-white font-bold items-center w-full rounded'>
