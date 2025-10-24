@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import type { MathfieldElement } from 'mathlive'
 import { twMerge } from 'tailwind-merge'
 import Xarrow from 'react-xarrows'
@@ -32,17 +32,19 @@ function isPrimaryDependency (dependency: TreeNode, dependent: TreeNode): boolea
 /**
  * A field that displays a node's equation and answer
  * @param props
- * @param props.node      The node
+ * @param props.node        The node
+ * @param props.showNumeric Show the numeric version of the value
  * @param props.className
+ * @param props.'read-only'
  */
-export function DynamicMathfield ({ node, className, ...props }: { node: TreeNode } & React.ComponentProps<'math-field'>): React.ReactNode {
+export function DynamicMathfield ({ node, showNumeric, className, 'read-only': rdonly = true, ...props }: { node: TreeNode, showNumeric?: boolean } & React.ComponentProps<'math-field'>): React.ReactNode {
   return (
-    <math-field {...props} read-only className={twMerge('inline bg-transparent text-neutral-content', className)}>
+    <math-field title={node.amortizedValue?.N().toString()} read-only={rdonly} className={twMerge('inline bg-transparent text-neutral-content', className)} {...props}>
       {node.rawUserEquation}
-      {node.amortizedValue && !node.parsedEquation.isNumberLiteral && (
+      {rdonly && node.amortizedValue && !node.parsedEquation.isNumberLiteral && (
         <>
           =
-          {node.amortizedValue.toLatex()}
+          {(showNumeric ? node.amortizedValue.N() : node.amortizedValue).toLatex()}
         </>
       )}
     </math-field>
@@ -55,9 +57,12 @@ export function DynamicMathfield ({ node, className, ...props }: { node: TreeNod
  * @param props.node The node
  */
 export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
-  const { tree } = useCalculator()
+  const fieldRef = useRef<MathfieldElement>(null)
+  const { tree, calculator } = useCalculator()
   const { Dialog: AliasDialog, handleShow: handleShowAlias, handleHide: handleHideAlias } = Modal.useDialog()
   const { Dialog: NoteDialog, handleShow: handleShowNote, handleHide: handleHideNote } = Modal.useDialog()
+
+  const [editing, setEditing] = useState(false)
 
   const insertID = useCallback(() => {
     const field = document.getElementById('eqInput') as MathfieldElement
@@ -106,7 +111,7 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
     }, { passive: true, signal: aborter.signal })
 
     return () => aborter.abort()
-  }, [node.dependencies.size, node.dependents.size])
+  }, [node.id, node.dependencies.size, node.dependents.size])
 
   const setAlias = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     if (((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement).value === 'remove') {
@@ -115,7 +120,7 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
     }
 
     const data = new FormData(e.currentTarget)
-    const alias = data.get('alias') as string
+    const alias = (data.get('alias') as string).toLowerCase()
 
     tree.setAlias(node, alias)
   }, [tree, node])
@@ -132,15 +137,25 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
     tree.setNote(node, note)
   }, [tree, node])
 
+  const startEditing = useCallback(() => {
+    setEditing(true)
+    fieldRef.current?.select()
+  }, [])
+
+  const saveEdit = useCallback(() => {
+    setEditing(false)
+    calculator.editNode(node, fieldRef.current!.value)
+  }, [calculator, node])
+
   return (
     <div className='flex flex-col items-center gap-24'>
-      <Card id={`node_${node.id}`} className='relative bg-neutral text-neutral-content w-48 shrink-0 h-32 p-2'>
+      <Card id={`node_${node.id}`} className='relative bg-neutral text-neutral-content w-48 shrink-0 h-32 p-2' onDoubleClick={(e) => { e.preventDefault(); startEditing() }}>
         <Card.Title className='flex gap-4 justify-between items-start'>
           <div className='flex flex-col gap-1'>
             <div className='flex gap-2'>
               <dt className='font-bold'>{node.id}</dt>
 
-              <Button variant='link' size='sm' onClick={insertID} className='p-0 h-auto'>Use</Button>
+              <Button variant='link' size='sm' onClick={insertID} className='p-0 h-auto' onDoubleClick={(e) => e.stopPropagation()}>Use</Button>
             </div>
 
             {node.alias && <h3 className='text-sm italic text-neutral-content/70'>{node.alias}</h3>}
@@ -149,7 +164,7 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
           <Dropdown>
             <Dropdown.Toggle button={false} role='button' className='symbol cursor-pointer'>more_vert</Dropdown.Toggle>
             <Dropdown.Menu className='bg-base-200 text-base-content w-max'>
-              <Dropdown.Item>Edit</Dropdown.Item>
+              <Dropdown.Item onClick={startEditing}>Edit</Dropdown.Item>
               <Dropdown.Item onClick={handleShowAlias}>{`${node.alias ? 'Edit' : 'Add'} Alias`}</Dropdown.Item>
               <Dropdown.Item onClick={handleShowNote}>{`${node.note ? 'Edit' : 'Add'} Note`}</Dropdown.Item>
               <Dropdown.Item onClick={deleteNode}>Delete</Dropdown.Item>
@@ -157,9 +172,24 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
           </Dropdown>
         </Card.Title>
 
-        <DynamicMathfield node={node} />
+        <DynamicMathfield
+          onKeyDown={editing ? (e) => e.key === 'Enter' && !e.defaultPrevented && saveEdit() : undefined}
+          ref={fieldRef}
+          node={node}
+          read-only={!editing}
+          className={twMerge(editing && 'bg-base-200 text-base-content')}
+        />
 
-        {node.note && <p className='text-xs text-neutral-content/60 line-clamp-1 overflow-ellipsis mt-auto' title={node.note}>{node.note}</p>}
+        {editing
+          ? (
+            <div className='flex justify-end gap-2 mt-auto'>
+              <Button color='error' size='xs' onClick={() => setEditing(false)}>Discard</Button>
+              <Button color='success' size='xs' onClick={saveEdit}>Save</Button>
+            </div>
+          )
+          : node.note
+            ? <p className='text-xs text-neutral-content/60 line-clamp-1 overflow-ellipsis mt-auto' title={node.note}>{node.note}</p>
+            : null}
       </Card>
 
       <div className='flex gap-12 empty:hidden'>
@@ -168,7 +198,7 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
 
           return (
             <Fragment key={n.id}>
-              <Xarrow divContainerStyle={{ zIndex: -1 }} start={`node_${node.id}`} end={`node_${n.id}`} headSize={3} color={isPrimary ? 'var(--color-secondary)' : 'var(--color-accent)'} />
+              <Xarrow divContainerStyle={{ zIndex: -1 }} start={`node_${node.id}`} end={`node_${n.id}`} path='straight' headSize={3} color={isPrimary ? 'var(--color-secondary)' : 'var(--color-accent)'} />
 
               {isPrimary && <VisualNode node={n} />}
             </Fragment>
@@ -183,7 +213,18 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
             <h2 className='strong'>{node.id}</h2>
           </Modal.Header>
           <Modal.Body className='flex flex-col-reverse gap-4'>
-            <Input name='alias' autoFocus defaultValue={node.alias} placeholder='Alias...' className='w-full' />
+            <Input
+              onChange={(e) => {
+                if (e.currentTarget.value.toLowerCase() === 'ans') e.currentTarget.setCustomValidity('Alias cannot be "ans"')
+                else if (e.currentTarget.value.match(/[^A-Za-z]/)) e.currentTarget.setCustomValidity('Alias must only contain letters')
+                else e.currentTarget.setCustomValidity('')
+              }}
+              name='alias'
+              autoFocus
+              defaultValue={node.alias}
+              placeholder='Alias...'
+              className='w-full lowercase'
+            />
 
             <Card className='bg-neutral p-4'>
               <DynamicMathfield node={node} />

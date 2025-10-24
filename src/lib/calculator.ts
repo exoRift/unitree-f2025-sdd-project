@@ -16,7 +16,7 @@ export class HistoryCalculator {
    * @returns        The sanitized equation
    */
   static sanitize (equation: string): string {
-    return equation.replaceAll(/\\\$(\w+)(?=\W|$)/g, (_, g) => `\\mathrm{${g}}`)
+    return equation.replaceAll(/\\\$(\w+)(?=\W|$)/g, (_, g) => `\\mathrm{${g.toLowerCase()}}`)
   }
 
   /**
@@ -57,11 +57,19 @@ export class HistoryCalculator {
 
     const symbols = parsed.symbols
     for (const symbol of symbols) {
+      if (symbol === 'ans' && this.tree.lastCreatedNode) dependencies.add(this.tree.lastCreatedNode)
+
       const depNode = this.tree.idLookup.get(symbol) ?? this.tree.aliasLookup.get(symbol)
       if (depNode) dependencies.add(depNode)
     }
 
     const context: Record<string, BoxedExpression> = {}
+
+    if (this.tree.lastCreatedNode) {
+      const value = this.tree.lastCreatedNode.amortizedValue ?? this.refreshNode(this.tree.lastCreatedNode)
+      context.ans = value
+    }
+
     for (const dependency of dependencies) {
       let value = dependency.amortizedValue
       if (!value) value = this.refreshNode(dependency)
@@ -71,13 +79,13 @@ export class HistoryCalculator {
     }
 
     // TODO: Prevent assignment
-    return [parsed.evaluate({ withArguments: context }), dependencies]
+    return [parsed.subs(context).evaluate(), dependencies]
   }
 
   /**
    * Evaluate an expression, returning its parsed expression, value, and dependencies
    * @param equation The equation to evaluate
-   * @returns        The result
+   * @returns        [parsed equation, value, dependencies]
    */
   evaluateExpression (equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
     const sanitized = HistoryCalculator.sanitize(equation)
@@ -89,9 +97,22 @@ export class HistoryCalculator {
   /**
    * Evaluate an expression and save it in history
    * @param equation The equation to evaluate
-   * @returns        The created node
+   * @returns        [parsed equation, value, dependencies]
    */
   saveNewExpression (equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
+    if (this.tree.lastCreatedNode) {
+      const numerical = (this.tree.lastCreatedNode.amortizedValue ?? this.refreshNode(this.tree.lastCreatedNode)).N()
+
+      if (numerical.isNumberLiteral) {
+        const replaced = equation.replaceAll(numerical.toLatex(), `\\$${this.tree.lastCreatedNode.id}`)
+
+        if (replaced !== equation) {
+          equation = replaced
+          this.tree.dispatchEvent(new CustomEvent('implicit'))
+        }
+      }
+    }
+
     const [parsed, value, dependencies] = this.evaluateExpression(equation)
 
     if (!value.errors.length) {
@@ -100,5 +121,21 @@ export class HistoryCalculator {
     }
 
     return [parsed, value, dependencies]
+  }
+
+  /**
+   * Edit the equation of a node and refresh it and its dependencies
+   * @param node     The node
+   * @param equation The new equation
+   * @returns        [parsed equation, value, dependencies]
+   */
+  editNode (node: TreeNode, equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
+    const sanitized = HistoryCalculator.sanitize(equation)
+    const parsed = this.engine.parse(sanitized)
+
+    node.rawUserEquation = equation
+    node.parsedEquation = parsed
+    const value = this.refreshNode(node)
+    return [parsed, value, node.dependencies]
   }
 }

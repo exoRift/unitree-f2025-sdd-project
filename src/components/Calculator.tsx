@@ -1,11 +1,60 @@
-import { useCallback, useState, type FormEvent } from 'react'
-import { Button } from 'react-daisyui'
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import type { BoxedExpression } from '@cortex-js/compute-engine'
 
 import { useCalculator } from '../hooks/useCalculator'
 
 import type { MathfieldElement } from 'mathlive'
 import { DynamicMathfield } from './HistoryTree/VisualNode'
+import { Button, Modal } from 'react-daisyui'
+
+/**
+ * A component that displays a modal the first time an implicit dependency is formed
+ */
+function ImplicitNotifier (): React.ReactNode {
+  const { tree } = useCalculator()
+  const { Dialog, handleShow, handleHide } = Modal.useDialog()
+
+  const dismiss = useCallback(() => {
+    handleHide()
+    localStorage.setItem('tips:implicit', 'true')
+  }, [handleHide])
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem('tips:implicit')
+    if (dismissed === 'true') return
+
+    const aborter = new AbortController()
+
+    tree.addEventListener('implicit', () => {
+      setTimeout(handleShow, 500)
+      aborter.abort()
+    }, { signal: aborter.signal })
+
+    return () => aborter.abort()
+  }, [tree, handleShow])
+
+  return (
+    <Dialog>
+      <Modal.Header>
+        <h1>Implicit Dependency</h1>
+      </Modal.Header>
+
+      <Modal.Body>
+        <p>
+          You've created an implicit dependency! This happens if you use the immediate last value
+          you computed in another equation. If you want to undo this, you can edit the node you created.
+          <br />
+          <br />
+          If you want to avoid this behavior altogether, change it in the settings.
+        </p>
+      </Modal.Body>
+
+      <Modal.Actions>
+        <Button color='primary' onClick={dismiss}>Okay, don't show this again</Button>
+      </Modal.Actions>
+    </Dialog>
+  )
+}
 
 /**
  * The calculator component. Handles the math input and eval
@@ -19,6 +68,7 @@ export function Calculator (): React.ReactNode {
   const submitEquation = useCallback((e?: React.FormEvent<HTMLFormElement>) => {
     e?.preventDefault()
     const input = document.getElementById('eqInput') as MathfieldElement
+    if (!input.value) return
     const [, outcome] = calculator.saveNewExpression(input.value)
 
     if (outcome.isValid) {
@@ -49,14 +99,20 @@ export function Calculator (): React.ReactNode {
 
   const updatePreview = useCallback((e: FormEvent<MathfieldElement>) => {
     const preview = document.getElementById('eqPreview') as MathfieldElement
+    if (!e.currentTarget.value) {
+      preview.setValue('')
+      return
+    }
 
     const [, outcome] = calculator.evaluateExpression(e.currentTarget.value)
 
-    preview.setValue(e.currentTarget.value ? outcome.toLatex() : '')
+    preview.setValue(e.currentTarget.value ? outcome.N().toLatex() : '')
   }, [calculator])
 
   return (
     <div className='p-4'>
+      <ImplicitNotifier />
+
       <h1 className='text-2xl font-semibold mb-4'>Enter an equation below...</h1>
       <form onSubmit={submitEquation} className='mb-4'>
         <div className='flex gap-4 mb-4'>
@@ -80,7 +136,7 @@ export function Calculator (): React.ReactNode {
               ? (
                 <p className='opacity-60 inline-flex items-start' key='result'>
                   <math-field read-only>{'\\text{Last equation: }'}</math-field>
-                  <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} />
+                  <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} showNumeric />
                 </p>
               )
               : null}
