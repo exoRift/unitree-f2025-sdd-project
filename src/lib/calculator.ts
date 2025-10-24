@@ -1,4 +1,4 @@
-import type { Tree, TreeNode } from './history'
+import type { TreeNode, Tree } from './history'
 
 import { ComputeEngine, type BoxedExpression } from '@cortex-js/compute-engine'
 
@@ -11,76 +11,131 @@ export class HistoryCalculator {
   readonly tree: Tree
 
   /**
+   * Sanitize an incoming equation
+   * @param equation The equation
+   * @returns        The sanitized equation
+   */
+  static sanitize (equation: string): string {
+    return equation.replaceAll(/\\\$(\w+)(?=\W|$)/g, (_, g) => `\\mathrm{${g.toLowerCase()}}`)
+  }
+
+  /**
    * Construct an evaluation context
    */
   constructor (tree: Tree) {
     this.tree = tree
   }
 
-  // private injectReferences (expression: BoxedExpression): void {
-  //   // TODO(@exoRift): Investigate collisions
-  //   const symbols = expression.symbols
-  //   for (const id of this.tree.idLookup.keys()) {
-  //     if (symbols.includes(id)) {
-  //       const node = this.tree.idLookup.get(id)!
-  //       const value = this.evaluateNode(node)
-
-  //       expression.subs(['Symbol', id], value)
-  //     }
-  //   }
-
-  //   for (const alias of this.tree.aliasLookup.keys()) {
-
-  //   }
-  // }
-
   /**
    * Evaluate a node
    * @modifies The node's amortized value
-   * @todo Support aliases
-   * @todo Support implicit dependencies
-   * @todo Decide on $ invocation
    * @param    node The node to evaluate
    * @returns       The evaluation result
    */
-  private evaluateNode (node: TreeNode): BoxedExpression {
-    if (node.amortizedValue) return node.amortizedValue
+  private refreshNode (node: TreeNode): BoxedExpression {
+    const [value, dependencies] = this.evaluateParsedExpression(node.parsedEquation)
+    node.amortizedValue = value
 
-    const symbols = node.parsedEquation.symbols
-    for (const dependency of node.dependencies) {
-      if (!symbols.includes(dependency.id)) this.tree.removeDependency(node, dependency)
-    }
-    for (const symbol of symbols) {
-      const depNode = this.tree.idLookup.get(symbol)
-      if (depNode && !node.dependencies.has(depNode)) {
-        this.tree.addDependency(node, depNode)
-      }
-    }
+    const missingDeps = node.dependencies.difference(dependencies)
+    for (const missingDep of missingDeps) this.tree.removeDependency(node, missingDep)
 
-    const context: Record<string, BoxedExpression> = {}
-    for (const dependency of node.dependencies) {
-      let value = dependency.amortizedValue
-      if (!value) value = this.evaluateNode(dependency)
-      context[dependency.id] = value
-    }
+    const newDeps = dependencies.difference(node.dependencies)
+    for (const newDep of newDeps) this.tree.addDependency(node, newDep)
 
-    node.amortizedValue = node.parsedEquation.evaluate({ withArguments: context })
     // Update dependents, if any
-    for (const dependent of node.dependents) {
-      this.evaluateNode(dependent)
-    }
+    for (const dependent of node.dependents) this.refreshNode(dependent)
     return node.amortizedValue
   }
 
   /**
-   * Evaluate a new equation, generating a new history entry
-   * @param equation The equation to evaluate
-   * @returns        The result
+   * Evaluate an expression an return its value and dependencies
+   * @param parsed The parsed expression
+   * @returns      [value, dependencies]
    */
-  evaluateNew (equation: string): BoxedExpression {
-    const parsed = this.engine.parse(equation)
-    const node = this.tree.addNewNode(equation, parsed)
+  private evaluateParsedExpression (parsed: BoxedExpression): [value: BoxedExpression, dependencies: Set<TreeNode>] {
+    const dependencies = new Set<TreeNode>()
 
-    return this.evaluateNode(node)
+    const symbols = parsed.symbols
+    for (const symbol of symbols) {
+      if (symbol === 'ans' && this.tree.lastCreatedNode) dependencies.add(this.tree.lastCreatedNode)
+
+      const depNode = this.tree.idLookup.get(symbol) ?? this.tree.aliasLookup.get(symbol)
+      if (depNode) dependencies.add(depNode)
+    }
+
+    const context: Record<string, BoxedExpression> = {}
+
+    if (this.tree.lastCreatedNode) {
+      const value = this.tree.lastCreatedNode.amortizedValue ?? this.refreshNode(this.tree.lastCreatedNode)
+      context.ans = value
+    }
+
+    for (const dependency of dependencies) {
+      let value = dependency.amortizedValue
+      if (!value) value = this.refreshNode(dependency)
+
+      context[dependency.id] = value
+      if (dependency.alias) context[dependency.alias] = value
+    }
+
+    // TODO: Prevent assignment
+    return [parsed.subs(context).evaluate(), dependencies]
+  }
+
+  /**
+   * Evaluate an expression, returning its parsed expression, value, and dependencies
+   * @param equation The equation to evaluate
+   * @returns        [parsed equation, value, dependencies]
+   */
+  evaluateExpression (equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
+    const sanitized = HistoryCalculator.sanitize(equation)
+    const parsed = this.engine.parse(sanitized)
+
+    return [parsed, ...this.evaluateParsedExpression(parsed)]
+  }
+
+  /**
+   * Evaluate an expression and save it in history
+   * @param equation The equation to evaluate
+   * @returns        [parsed equation, value, dependencies]
+   */
+  saveNewExpression (equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
+    if (this.tree.lastCreatedNode) {
+      const numerical = (this.tree.lastCreatedNode.amortizedValue ?? this.refreshNode(this.tree.lastCreatedNode)).N()
+
+      if (numerical.isNumberLiteral) {
+        const replaced = equation.replaceAll(numerical.toLatex(), `\\$${this.tree.lastCreatedNode.id}`)
+
+        if (replaced !== equation) {
+          equation = replaced
+          this.tree.dispatchEvent(new CustomEvent('implicit'))
+        }
+      }
+    }
+
+    const [parsed, value, dependencies] = this.evaluateExpression(equation)
+
+    if (!value.errors.length) {
+      const node = this.tree.addNewNode(equation, parsed, ...dependencies)
+      node.amortizedValue = value
+    }
+
+    return [parsed, value, dependencies]
+  }
+
+  /**
+   * Edit the equation of a node and refresh it and its dependencies
+   * @param node     The node
+   * @param equation The new equation
+   * @returns        [parsed equation, value, dependencies]
+   */
+  editNode (node: TreeNode, equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
+    const sanitized = HistoryCalculator.sanitize(equation)
+    const parsed = this.engine.parse(sanitized)
+
+    node.rawUserEquation = equation
+    node.parsedEquation = parsed
+    const value = this.refreshNode(node)
+    return [parsed, value, node.dependencies]
   }
 }

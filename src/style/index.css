@@ -8,6 +8,10 @@
   themes: emerald --default;
 }
 
+.modal-backdrop button {
+  @apply cursor-default;
+}
+
 .mainBg { background-color: #B97A57; }
 .secondBg {background-color: #7B3F16;}
 .toolbarFont {font-family: Georgia;}
