@@ -1,9 +1,9 @@
 /**
  * The top toolbar component. User customization, workspacing, and other settings are managed here
  */
-import { useState } from 'react'
-
-import logo from '../images/unitree_logo.png'
+import { useSettings } from '../hooks/useSettings'
+import React, { useState } from 'react'
+import logo from '../images/unitree_logo_noWords.png'
 
 /**
  * Toolbar includes the logo, save button, restart button, and settings button equipped with the
@@ -12,8 +12,8 @@ import logo from '../images/unitree_logo.png'
  */
 export function Toolbar (): React.ReactNode {
   const [popupOpen, setPopupIsOpen] = useState(false)
-  const [darkModeOn, setDarkModeOn] = useState(false)
-  const [horizontalOn, setHorizonalOn] = useState(false)
+  const { horizontalOn, setHorizontalOn, darkModeOn, setDarkModeOn } = useSettings()
+
   return (
     <header>
       <div className='mainBg toolbarFont flex flex-row text-white font-bold items-center w-full rounded'>
@@ -43,7 +43,7 @@ export function Toolbar (): React.ReactNode {
             {/* Checkboxes (not functional) */}
             <div className='flex flex-col'>
               <label className='hover:cursor-pointer'>
-                <input type='checkbox' className='hover:cursor-pointer' checked={horizontalOn} onChange={(e) => { setHorizonalOn(e.target.checked) }} />
+                <input type='checkbox' className='hover:cursor-pointer' checked={horizontalOn} onChange={(e) => { setHorizontalOn(e.target.checked) }} />
                 Horizonal Divider
               </label>
               <label className='hover:cursor-pointer'>
