@@ -8,7 +8,7 @@ import { ComputeEngine, type BoxedExpression } from '@cortex-js/compute-engine'
 export class HistoryCalculator {
   private readonly engine = new ComputeEngine()
 
-  readonly tree: Tree
+  tree: Tree
 
   /**
    * Sanitize an incoming equation
@@ -24,27 +24,6 @@ export class HistoryCalculator {
    */
   constructor (tree: Tree) {
     this.tree = tree
-  }
-
-  /**
-   * Evaluate a node
-   * @modifies The node's amortized value
-   * @param    node The node to evaluate
-   * @returns       The evaluation result
-   */
-  private refreshNode (node: TreeNode): BoxedExpression {
-    const [value, dependencies] = this.evaluateParsedExpression(node.parsedEquation)
-    node.amortizedValue = value
-
-    const missingDeps = node.dependencies.difference(dependencies)
-    for (const missingDep of missingDeps) this.tree.removeDependency(node, missingDep)
-
-    const newDeps = dependencies.difference(node.dependencies)
-    for (const newDep of newDeps) this.tree.addDependency(node, newDep)
-
-    // Update dependents, if any
-    for (const dependent of node.dependents) this.refreshNode(dependent)
-    return node.amortizedValue
   }
 
   /**
@@ -80,6 +59,27 @@ export class HistoryCalculator {
 
     // TODO: Prevent assignment
     return [parsed.subs(context).evaluate(), dependencies]
+  }
+
+  /**
+   * Evaluate a node
+   * @modifies The node's amortized value
+   * @param    node The node to evaluate
+   * @returns       The evaluation result
+   */
+  refreshNode (node: TreeNode): BoxedExpression {
+    const [value, dependencies] = this.evaluateParsedExpression(node.parsedEquation)
+    node.amortizedValue = value
+
+    const missingDeps = node.dependencies.difference(dependencies)
+    for (const missingDep of missingDeps) this.tree.removeDependency(node, missingDep)
+
+    const newDeps = dependencies.difference(node.dependencies)
+    for (const newDep of newDeps) this.tree.addDependency(node, newDep)
+
+    // Update dependents, if any
+    for (const dependent of node.dependents) this.refreshNode(dependent)
+    return node.amortizedValue
   }
 
   /**
@@ -135,6 +135,7 @@ export class HistoryCalculator {
 
     node.rawUserEquation = equation
     node.parsedEquation = parsed
+    node.lastModified = new Date()
     const value = this.refreshNode(node)
     return [parsed, value, node.dependencies]
   }
