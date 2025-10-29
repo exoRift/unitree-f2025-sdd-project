@@ -1,14 +1,14 @@
 import { SettingsProvider, useSettings } from './hooks/useSettings'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
-import { useRef } from 'react'
-
-import { Tree } from './lib/history'
+import { useEffect, useRef, useState } from 'react'
 
 import { Toolbar } from './components/Toolbar'
 import { HistoryTree } from './components/HistoryTree'
 import { Calculator } from './components/Calculator'
 import { HistoryCalculator } from './lib/calculator'
-import { HistoryContext } from './hooks/useCalculator'
+import { SessionContext, useCalculator } from './hooks/useCalculator'
+import { SessionManager } from './lib/session'
+import { twMerge } from 'tailwind-merge'
 
 /**
  * A stylized resize handle
@@ -24,9 +24,33 @@ function ResizeHandle (): React.ReactNode {
 }
 
 /**
+ * A save icon to be displayed when saving the session state
+ */
+function SaveIcon (): React.ReactNode {
+  const { session } = useCalculator()
+
+  const [shown, setShown] = useState(false)
+
+  useEffect(() => {
+    const aborter = new AbortController()
+
+    session.addEventListener('saving', () => setShown(true), { signal: aborter.signal })
+    session.addEventListener('saved', () => setShown(false), { signal: aborter.signal })
+
+    return () => aborter.abort()
+  }, [session])
+
+  return (
+    <div className='fixed bottom-2 left-2'>
+      <div className={twMerge('transition symbol animate-spin', shown ? 'opacity-100' : 'opacity-0')}>save</div>
+    </div>
+  )
+}
+
+/**
  * Contains application components
  * @returns Unitree layout equipped with the Toolbar, History-Tree, resizable panel divider, and
- * Calculator
+ *  Calculator
  */
 function AppContext (): React.ReactNode {
   const { horizontalOn, setHorizontalOn } = useSettings()
@@ -46,6 +70,8 @@ function AppContext (): React.ReactNode {
           </div>
         </Panel>
       </PanelGroup>
+
+      <SaveIcon />
     </div>
   )
 }
@@ -55,16 +81,25 @@ function AppContext (): React.ReactNode {
  */
 export default function App (): React.ReactNode {
   const ctx = useRef((() => {
-    const tree = new Tree()
+    const session = new SessionManager()
+    session.recall()
+    const tree = session.tree
     const calculator = new HistoryCalculator(tree)
-    return { tree, calculator }
+    return { tree, calculator, session }
   })())
 
+  useEffect(() => {
+    const ctxVal = ctx.current
+    ctxVal.session.startAutosaving()
+
+    return () => ctxVal.session.stopAutosaving()
+  }, [])
+
   return (
-    <HistoryContext.Provider value={ctx.current}>
+    <SessionContext.Provider value={ctx.current}>
       <SettingsProvider>
         <AppContext />
       </SettingsProvider>
-    </HistoryContext.Provider>
+    </SessionContext.Provider>
   )
 }
