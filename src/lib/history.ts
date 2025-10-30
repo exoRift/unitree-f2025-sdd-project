@@ -208,8 +208,9 @@ export class Tree extends EventTarget {
    * @throws {Error}       if node is not present in the tree
    */
   setAlias (node: TreeNode, alias: string | undefined): void {
-    if (alias === '') return
+    if (alias === '' || node.alias === alias) return
     if (!this.nodes.has(node)) throw new Error('Node not present in tree')
+    if (alias && this.aliasLookup.has(alias)) throw new Error('Alias already taken')
     if (alias) this.aliasLookup.set(alias, node)
     else if (node.alias) this.aliasLookup.delete(node.alias)
     node.alias = alias

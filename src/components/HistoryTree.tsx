@@ -31,13 +31,19 @@ export function HistoryTree (): React.ReactNode {
     if (!aliasingNode) return
     if (((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement).value === 'remove') {
       tree.setAlias(aliasingNode, undefined)
+
       return
     }
 
     const data = new FormData(e.currentTarget)
     const alias = (data.get('alias') as string).toLowerCase()
 
-    tree.setAlias(aliasingNode, alias)
+    try {
+      tree.setAlias(aliasingNode, alias)
+    } catch (err) {
+      if (err instanceof Error) alert(err.message)
+      e.preventDefault()
+    }
   }, [tree, aliasingNode])
 
   const setNote = useCallback((e: React.FormEvent<HTMLFormElement>) => {
