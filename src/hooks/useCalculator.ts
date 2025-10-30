@@ -4,8 +4,6 @@ import { Tree } from '../lib/history'
 import { HistoryCalculator } from '../lib/calculator'
 import { SessionManager } from '../lib/session'
 
-type ContextType<T> = T extends React.Context<infer U> ? U : never
-
 export const SessionContext = createContext((() => {
   const session = new SessionManager()
 

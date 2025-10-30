@@ -1,45 +1,70 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { type } from 'arktype'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
-interface SettingsContentContext {
-  horizontalOn: boolean
-  setHorizontalOn: (val: boolean) => void
-  darkModeOn: boolean
-  setDarkModeOn: (val: boolean) => void
+const SettingsSchema = type({
+  orientation: type('"horizontal" | "vertical"').default('horizontal'),
+  autoSnapToNew: type.boolean.default(false),
+  theme: type('"light" | "dark" | "system"').default('system')
+})
+
+export type SettingsSchema = typeof SettingsSchema.infer
+
+export const SettingsContext = createContext({
+  settings: SettingsSchema({}) as SettingsSchema,
+  setSettings: (_s: SettingsSchema) => {}
+})
+
+export type Setters = {
+  [K in keyof SettingsSchema]: (value: SettingsSchema[K]) => void
 }
 
-const SettingsContext = createContext<SettingsContentContext | null>(null)
-
-export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [horizontalOn, setHorizontalOn] = useState<boolean>(() => {
-    const storedLocally = localStorage.getItem('horizontalOn')
-    return storedLocally ? JSON.parse(storedLocally) : false
-  })
-  const [darkModeOn, setDarkModeOn] = useState<boolean>(() => {
-    const storedLocally = localStorage.getItem('darkModeOn')
-    return storedLocally ? JSON.parse(storedLocally) : false
-  })
+/**
+ * A context for providing settings to the application from localStorage
+ */
+export function SettingsProvider ({ children }: React.PropsWithChildren): React.ReactNode {
+  const [settings, setSettings] = useState(SettingsSchema({}) as SettingsSchema)
 
   useEffect(() => {
-    localStorage.setItem('horizontalOn', JSON.stringify(horizontalOn))
-  }, [horizontalOn])
-  useEffect(() => {
-    localStorage.setItem('darkModeOn', JSON.stringify(darkModeOn))
-  }, [darkModeOn])
+    const readValue = localStorage.getItem('settings')
+    const json = (readValue && JSON.parse(readValue)) || {}
+
+    const parsed = SettingsSchema(json)
+
+    if (parsed instanceof type.errors) {
+      console.error(parsed.toTraversalError())
+      return
+    }
+
+    setSettings(parsed)
+  }, [])
 
   return (
-    <SettingsContext.Provider value={{ horizontalOn, setHorizontalOn, darkModeOn, setDarkModeOn }}>
+    <SettingsContext.Provider value={{ settings, setSettings }}>
       {children}
     </SettingsContext.Provider>
   )
 }
 
 /**
- * horizontalOn, setHorizontalOn, darkModeOn, and setDarkModeOn boolean
- * values are passed via SettingsContext via context
- * @returns Defined context
+ * A hook to read and update settings (also update localStorage)
+ * @returns The settings and setter functions
  */
-export function useSettings () {
-  const context = useContext(SettingsContext)
+export function useSettings (): { settings: SettingsSchema, setters: Setters } {
+  const { settings, setSettings } = useContext(SettingsContext)
 
-  return context
+  const setters = useMemo(() =>
+    Object.fromEntries(SettingsSchema.props.map((prop) => (value: unknown) => {
+      const updated = SettingsSchema({
+        ...settings,
+        [prop.key]: value
+      })
+
+      if (updated instanceof type.errors) throw updated.toTraversalError()
+
+      localStorage.setItem('settings', JSON.stringify(updated))
+      setSettings(updated)
+    }) as any) as Setters
+  , [settings, setSettings])
+
+  return { settings, setters }
 }
