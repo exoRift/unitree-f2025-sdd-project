@@ -74,4 +74,11 @@ export class SessionManager extends EventTarget {
   stopAutosaving (): void {
     this.tree.removeEventListener('mutate', this.scheduleSave.bind(this))
   }
+
+  /**
+   * Clear the active session
+   */
+  clear (): void {
+    this.tree.clear()
+  }
 }

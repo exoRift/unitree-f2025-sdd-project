@@ -244,6 +244,19 @@ export class Tree extends EventTarget {
       roots
     }
   }
+
+  /**
+   * Clears the tree and resets to initial state
+   */
+  clear (): void {
+    this.lastCreatedNode = undefined
+    this.roots.clear()
+    this.nodes.clear()
+    this.aliasLookup.clear()
+    this.idLetterIterator = 0
+    this.idNumberIterators.clear()
+    this.dispatchEvent(new CustomEvent('mutate'))
+  }
 }
 
 /**
