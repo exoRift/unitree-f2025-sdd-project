@@ -1,12 +1,12 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import type { MathfieldElement } from 'mathlive'
 import { twMerge } from 'tailwind-merge'
-import Xarrow from 'react-xarrows'
 
 import type { TreeNode } from '../../lib/history'
 import { useCalculator } from '../../hooks/useCalculator'
 
-import { Button, Card, Dropdown, Input, Modal } from 'react-daisyui'
+import Xarrow from 'react-xarrows'
+import { Button, Card, Dropdown } from 'react-daisyui'
 
 /**
  * Determine if a dependency is the primary dependency of a dependent

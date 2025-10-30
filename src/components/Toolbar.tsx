@@ -73,7 +73,7 @@ export function Toolbar (): React.ReactNode {
       <Navbar>
         <Navbar.Start>
           <img src={logo} width={56} />
-          <h1 className='text-2xl font-bold ml-2'>Unitree</h1>
+          <h1 className='text-3xl font-bold ml-2 scale-y-110'>Unitree</h1>
         </Navbar.Start>
 
         <Navbar.End>
