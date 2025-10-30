@@ -35,8 +35,8 @@ function SaveIcon (): React.ReactNode {
   useEffect(() => {
     const aborter = new AbortController()
 
-    session.addEventListener('saving', () => setShown(true), { signal: aborter.signal })
-    session.addEventListener('saved', () => setShown(false), { signal: aborter.signal })
+    session.addEventListener('saving', () => setShown(true), { signal: aborter.signal, passive: true })
+    session.addEventListener('saved', () => setShown(false), { signal: aborter.signal, passive: true })
 
     return () => aborter.abort()
   }, [session])

@@ -1,7 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
-import { Tree } from '../lib/history'
-import { HistoryCalculator } from '../lib/calculator'
 import { SessionManager } from '../lib/session'
 
 export const SessionContext = createContext((() => {
@@ -28,7 +26,7 @@ export function useCalculator (): ContextType<typeof SessionContext> {
 
   useEffect(() => {
     const aborter = new AbortController()
-    ctx.tree.addEventListener('mutate', () => setSignal((prior) => prior + 1), { signal: aborter.signal })
+    ctx.tree.addEventListener('mutate', () => setSignal((prior) => prior + 1), { signal: aborter.signal, passive: true })
 
     return () => aborter.abort()
   }, [ctx])

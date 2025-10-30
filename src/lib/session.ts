@@ -65,7 +65,7 @@ export class SessionManager extends EventTarget {
    * Start listening on mutations to auto save
    */
   startAutosaving (): void {
-    this.tree.addEventListener('mutate', this.scheduleSave.bind(this))
+    this.tree.addEventListener('mutate', this.scheduleSave.bind(this), { passive: true })
   }
 
   /**
