@@ -54,10 +54,15 @@ export class SessionManager extends EventTarget {
     const old = localStorage.getItem('session:state')
 
     if (old) {
-      const parsed = JSON.parse(old) as SerializedTree
-      this.tree = new Tree(parsed)
-      this.calculator.tree = this.tree
-      for (const node of this.tree.roots) this.calculator.refreshNode(node)
+      try {
+        const parsed = JSON.parse(old) as SerializedTree
+        this.tree = new Tree(parsed)
+        this.calculator.tree = this.tree
+        for (const node of this.tree.roots) this.calculator.refreshNode(node)
+      } catch (err) {
+        console.error('Stored session corrupted', err, old)
+        localStorage.removeItem('session:state')
+      }
     }
   }
 
