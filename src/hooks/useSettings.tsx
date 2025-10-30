@@ -53,17 +53,20 @@ export function useSettings (): { settings: SettingsSchema, setters: Setters } {
   const { settings, setSettings } = useContext(SettingsContext)
 
   const setters = useMemo(() =>
-    Object.fromEntries(SettingsSchema.props.map((prop) => (value: unknown) => {
-      const updated = SettingsSchema({
-        ...settings,
-        [prop.key]: value
-      })
+    Object.fromEntries(SettingsSchema.props.map((prop) => [
+      prop.key,
+      (value: unknown) => {
+        const updated = SettingsSchema({
+          ...settings,
+          [prop.key]: value
+        })
 
-      if (updated instanceof type.errors) throw updated.toTraversalError()
+        if (updated instanceof type.errors) throw updated.toTraversalError()
 
-      localStorage.setItem('settings', JSON.stringify(updated))
-      setSettings(updated)
-    }) as any) as Setters
+        localStorage.setItem('settings', JSON.stringify(updated))
+        setSettings(updated)
+      }
+    ]) as any) as Setters
   , [settings, setSettings])
 
   return { settings, setters }
