@@ -142,8 +142,8 @@ export function Calculator (): React.ReactNode {
               : null}
         </div>
       </form>
-      <div className='gap-2 grid grid-cols-[repeat(4,26rem)]'>
-        <div id='container' className='grid grid-cols-[repeat(4,6rem)] grid-rows-[repeat(4,6rem)] gap-2 mt-4 *:w-full *:h-full *:text-2xl *:brightness-150'>
+      <div className='flex flex-col lg:flex-row gap-8 justify-left items-start'>
+        <div id='container' className='grid grid-cols-4 gap-3 place-items-center'>
           {[
             { label: 'cos', symbol: '\\cos{\\placeholder}', italic: true },
             { label: 'sin', symbol: '\\sin{\\placeholder}', italic: true },
@@ -174,7 +174,7 @@ export function Calculator (): React.ReactNode {
             </Button>
           ))}
         </div>
-        <div id='container' className='grid grid-cols-[repeat(4,6rem)] grid-rows-[repeat(4,6rem)] gap-2 mt-4 *:w-full *:h-full *:text-2xl'>
+        <div id='container' className='grid grid-cols-4 gap-3 place-items-center'>
           {[
             '4', '5', '6', '/', '7', '8', '9', '*', '1', '2', '3', '+', '+/-', '0', '.', '-'
           ].map((label, i) => (
