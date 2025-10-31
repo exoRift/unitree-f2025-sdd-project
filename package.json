@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "validate": "tsc -b",
-    "preview": "vite preview",
+    "preview": "PORT=3000 vite preview",
     "update-icons": "curl -L https://github.com/google/material-design-icons/raw/master/variablefont/MaterialSymbolsOutlined%5BFILL,GRAD,opsz,wght%5D.woff2 -o public/fonts/material-symbols.woff2"
   },
   "dependencies": {
