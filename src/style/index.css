@@ -11,3 +11,7 @@
 .modal-backdrop button {
   @apply cursor-default;
 }
+
+math-field.pointer-events-none::part(content) {
+  pointer-events: none;
+}

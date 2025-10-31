@@ -6,6 +6,7 @@ import { useCalculator } from '../hooks/useCalculator'
 import type { MathfieldElement } from 'mathlive'
 import { DynamicMathfield } from './HistoryTree/VisualNode'
 import { Button, Modal } from 'react-daisyui'
+import { twMerge } from 'tailwind-merge'
 
 /**
  * A component that displays a modal the first time an implicit dependency is formed
@@ -122,7 +123,10 @@ export function Calculator (): React.ReactNode {
         </div>
 
         <div className='flex gap-4 justify-between'>
-          <Button type='submit' color='primary'>Evaluate & Save</Button>
+          <Button type='submit' color='primary' className='pl-3'>
+            <div className='symbol'>subdirectory_arrow_left</div>
+            <span>Evaluate & Save</span>
+          </Button>
 
           {errors
             ? (
@@ -142,24 +146,55 @@ export function Calculator (): React.ReactNode {
               : null}
         </div>
       </form>
-
-      <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-2xl'>
-        <Button color='neutral' onClick={() => appendSymbol('7')}>7</Button>
-        <Button color='neutral' onClick={() => appendSymbol('8')}>8</Button>
-        <Button color='neutral' onClick={() => appendSymbol('9')}>9</Button>
-        <Button color='neutral' onClick={() => appendSymbol('*')}>*</Button>
-        <Button color='neutral' onClick={() => appendSymbol('4')}>4</Button>
-        <Button color='neutral' onClick={() => appendSymbol('5')}>5</Button>
-        <Button color='neutral' onClick={() => appendSymbol('6')}>6</Button>
-        <Button color='neutral' onClick={() => appendSymbol('/')}>/</Button>
-        <Button color='neutral' onClick={() => appendSymbol('1')}>1</Button>
-        <Button color='neutral' onClick={() => appendSymbol('2')}>2</Button>
-        <Button color='neutral' onClick={() => appendSymbol('3')}>3</Button>
-        <Button color='neutral' onClick={() => appendSymbol('+')}>+</Button>
-        <Button color='neutral' onClick={negate}>+/-</Button>
-        <Button color='neutral' onClick={() => appendSymbol('0')}>0</Button>
-        <Button color='neutral' onClick={() => appendSymbol('.')}>.</Button>
-        <Button color='neutral' onClick={() => appendSymbol('-')}>-</Button>
+      <div className='flex max-lg:flex-col max-lg:items-center justify-center gap-4'>
+        <div id='container' className='grid grid-cols-4 gap-1 place-items-center'>
+          {[
+            { label: 'cos', symbol: '\\cos{\\placeholder{}}', italic: true },
+            { label: 'sin', symbol: '\\sin{\\placeholder{}}', italic: true },
+            { label: 'tan', symbol: '\\tan{\\placeholder{}}', italic: true },
+            { label: 'θ', symbol: '\\theta', italic: true },
+            { label: 'e', symbol: 'e' },
+            { label: '\\ln', symbol: '\\ln{\\placeholder{}}' },
+            { label: '\\log', symbol: '\\log{\\placeholder{}}' },
+            { label: '\\pi', symbol: '\\pi' },
+            { label: '\\sqrt{\\placeholder{}}', symbol: '\\sqrt{\\placeholder{}}' },
+            { label: 'x^\\placeholder{}', symbol: 'x^{\\placeholder{}}' },
+            { label: '{\\placeholder{}}^2', symbol: '{\\placeholder{}}^2' },
+            { label: '\\tiny{\\frac{\\placeholder{}}{{\\placeholder{}}}}', symbol: '\\frac{\\placeholder{}}{{\\placeholder{}}}', inflate: true },
+            { label: '\\frac{d}{dx}', symbol: '(\\Box)\\prime' },
+            { label: '∫', symbol: '\\int{\\placeholder{}}dx' },
+            { label: '\\int_{\\placeholder{}}^{\\placeholder{}}\\placeholder{}', symbol: '\\int_{\\placeholder{}}^{\\placeholder{}}\\placeholder{} dx' },
+            { label: '{\\placeholder{}}!', symbol: '{\\placeholder{}}!' }
+          ].map((btn, i) => (
+            <Button
+              key={i}
+              color='neutral'
+              className={twMerge('w-20 h-20 text-2xl', btn.italic && 'italic', btn.inflate && 'text-4xl')}
+              onClick={() => appendSymbol(btn.symbol)}
+            >
+              <math-field read-only className='bg-transparent text-white pointer-events-none'>
+                {btn.label}
+              </math-field>
+            </Button>
+          ))}
+        </div>
+        <div id='container' className='grid grid-cols-4 gap-1 place-items-center'>
+          {[
+            '4', '5', '6', '/', '7', '8', '9', '*', '1', '2', '3', '+', '+/-', '0', '.', '-'
+          ].map((label, i) => (
+            <Button
+              key={i}
+              color='neutral'
+              className={twMerge('w-20 h-20 text-2xl', ['*', '/', '+', '-'].includes(label) && 'brightness-150')}
+              onClick={() => {
+                if (label === '+/-') negate()
+                else appendSymbol(label)
+              }}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   )
