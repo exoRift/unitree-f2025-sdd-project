@@ -54,10 +54,15 @@ export class SessionManager extends EventTarget {
     const old = localStorage.getItem('session:state')
 
     if (old) {
-      const parsed = JSON.parse(old) as SerializedTree
-      this.tree = new Tree(parsed)
-      this.calculator.tree = this.tree
-      for (const node of this.tree.roots) this.calculator.refreshNode(node)
+      try {
+        const parsed = JSON.parse(old) as SerializedTree
+        this.tree = new Tree(parsed)
+        this.calculator.tree = this.tree
+        for (const node of this.tree.roots) this.calculator.refreshNode(node)
+      } catch (err) {
+        console.error('Stored session corrupted', err, old)
+        localStorage.removeItem('session:state')
+      }
     }
   }
 
@@ -65,7 +70,7 @@ export class SessionManager extends EventTarget {
    * Start listening on mutations to auto save
    */
   startAutosaving (): void {
-    this.tree.addEventListener('mutate', this.scheduleSave.bind(this))
+    this.tree.addEventListener('mutate', this.scheduleSave.bind(this), { passive: true })
   }
 
   /**
@@ -73,5 +78,12 @@ export class SessionManager extends EventTarget {
    */
   stopAutosaving (): void {
     this.tree.removeEventListener('mutate', this.scheduleSave.bind(this))
+  }
+
+  /**
+   * Clear the active session
+   */
+  clear (): void {
+    this.tree.clear()
   }
 }

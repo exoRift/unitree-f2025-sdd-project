@@ -1,12 +1,12 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import type { MathfieldElement } from 'mathlive'
 import { twMerge } from 'tailwind-merge'
-import Xarrow from 'react-xarrows'
 
 import type { TreeNode } from '../../lib/history'
 import { useCalculator } from '../../hooks/useCalculator'
 
-import { Button, Card, Dropdown, Input, Modal } from 'react-daisyui'
+import Xarrow from 'react-xarrows'
+import { Button, Card, Dropdown } from 'react-daisyui'
 
 /**
  * Determine if a dependency is the primary dependency of a dependent
@@ -54,13 +54,13 @@ export function DynamicMathfield ({ node, showNumeric, className, 'read-only': r
 /**
  * A TreeNode
  * @param props
- * @param props.node The node
+ * @param props.node    The node
+ * @param props.onAlias A callback for when the "add alias" option is clicked
+ * @param props.onNote  A callback for when the "add note" option is clicked
  */
-export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
+export function VisualNode ({ node, onAlias, onNote }: { node: TreeNode, onAlias: (node: TreeNode) => void, onNote: (node: TreeNode) => void }): React.ReactNode {
   const fieldRef = useRef<MathfieldElement>(null)
   const { tree, calculator } = useCalculator()
-  const { Dialog: AliasDialog, handleShow: handleShowAlias, handleHide: handleHideAlias } = Modal.useDialog()
-  const { Dialog: NoteDialog, handleShow: handleShowNote, handleHide: handleHideNote } = Modal.useDialog()
 
   const [editing, setEditing] = useState(false)
 
@@ -113,30 +113,6 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
     return () => aborter.abort()
   }, [node.id, node.dependencies.size, node.dependents.size])
 
-  const setAlias = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    if (((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement).value === 'remove') {
-      tree.setAlias(node, undefined)
-      return
-    }
-
-    const data = new FormData(e.currentTarget)
-    const alias = (data.get('alias') as string).toLowerCase()
-
-    tree.setAlias(node, alias)
-  }, [tree, node])
-
-  const setNote = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    if (((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement).value === 'remove') {
-      tree.setNote(node, undefined)
-      return
-    }
-
-    const data = new FormData(e.currentTarget)
-    const note = data.get('note') as string
-
-    tree.setNote(node, note)
-  }, [tree, node])
-
   const startEditing = useCallback(() => {
     setEditing(true)
     fieldRef.current?.select()
@@ -165,8 +141,8 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
             <Dropdown.Toggle button={false} role='button' className='symbol cursor-pointer'>more_vert</Dropdown.Toggle>
             <Dropdown.Menu className='bg-base-200 text-base-content w-max'>
               <Dropdown.Item onClick={startEditing}>Edit</Dropdown.Item>
-              <Dropdown.Item onClick={handleShowAlias}>{`${node.alias ? 'Edit' : 'Add'} Alias`}</Dropdown.Item>
-              <Dropdown.Item onClick={handleShowNote}>{`${node.note ? 'Edit' : 'Add'} Note`}</Dropdown.Item>
+              <Dropdown.Item onClick={() => onAlias(node)}>{`${node.alias ? 'Edit' : 'Add'} Alias`}</Dropdown.Item>
+              <Dropdown.Item onClick={() => onNote(node)}>{`${node.note ? 'Edit' : 'Add'} Note`}</Dropdown.Item>
               <Dropdown.Item onClick={deleteNode}>Delete</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
@@ -200,66 +176,11 @@ export function VisualNode ({ node }: { node: TreeNode }): React.ReactNode {
             <Fragment key={n.id}>
               <Xarrow divContainerStyle={{ zIndex: -1 }} start={`node_${node.id}`} end={`node_${n.id}`} path='straight' headSize={3} color={isPrimary ? 'var(--color-secondary)' : 'var(--color-accent)'} />
 
-              {isPrimary && <VisualNode node={n} />}
+              {isPrimary && <VisualNode node={n} onAlias={() => onAlias(node)} onNote={() => onNote(node)} />}
             </Fragment>
           )
         })}
       </div>
-
-      <AliasDialog backdrop>
-        <form method='dialog' onSubmit={setAlias}>
-          <Modal.Header>
-            <h1>Add alias</h1>
-            <h2 className='strong'>{node.id}</h2>
-          </Modal.Header>
-          <Modal.Body className='flex flex-col-reverse gap-4'>
-            <Input
-              onChange={(e) => {
-                if (e.currentTarget.value.toLowerCase() === 'ans') e.currentTarget.setCustomValidity('Alias cannot be "ans"')
-                else if (e.currentTarget.value.match(/[^A-Za-z]/)) e.currentTarget.setCustomValidity('Alias must only contain letters')
-                else e.currentTarget.setCustomValidity('')
-              }}
-              name='alias'
-              autoFocus
-              defaultValue={node.alias}
-              placeholder='Alias...'
-              className='w-full lowercase'
-            />
-
-            <Card className='bg-neutral p-4'>
-              <DynamicMathfield node={node} />
-            </Card>
-          </Modal.Body>
-
-          <Modal.Actions className='flex-row-reverse justify-start'>
-            <Button type='submit' color='success'>Save</Button>
-            <Button type='reset' color='neutral' onClick={handleHideAlias}>Cancel</Button>
-            {node.alias && <Button type='submit' value='remove' color='error' className='mr-auto'>Remove</Button>}
-          </Modal.Actions>
-        </form>
-      </AliasDialog>
-
-      <NoteDialog backdrop>
-        <form method='dialog' onSubmit={setNote}>
-          <Modal.Header>
-            <h1>Add Note</h1>
-            <h2 className='strong'>{node.id}</h2>
-          </Modal.Header>
-          <Modal.Body className='flex flex-col-reverse gap-4'>
-            <Input name='note' autoFocus defaultValue={node.note} placeholder='Note...' className='w-full' />
-
-            <Card className='bg-neutral p-4'>
-              <DynamicMathfield node={node} />
-            </Card>
-          </Modal.Body>
-
-          <Modal.Actions className='flex-row-reverse justify-start'>
-            <Button type='submit' color='success'>Save</Button>
-            <Button type='reset' color='neutral' onClick={handleHideNote}>Cancel</Button>
-            {node.note && <Button type='submit' value='remove' color='error' className='mr-auto'>Remove</Button>}
-          </Modal.Actions>
-        </form>
-      </NoteDialog>
     </div>
   )
 }

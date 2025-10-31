@@ -1,63 +1,85 @@
 /**
  * The top toolbar component. User customization, workspacing, and other settings are managed here
  */
-import { useSettings } from '../hooks/useSettings'
-import React, { useState } from 'react'
+import { useState } from 'react'
+
+import { useSettings, type SettingsSchema } from '../hooks/useSettings'
+
+import { Button, Modal, Navbar, Select, Toggle } from 'react-daisyui'
+
 import logo from '../images/unitree_logo_noWords.png'
+
+/**
+ * A button that opens up the settings menu
+ */
+function SettingsButton (): React.ReactNode {
+  const { settings, setters } = useSettings()
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div>
+      <button className='group inline-flex justify-center items-center cursor-pointer overflow-clip size-12' onClick={() => setOpen(true)}>
+        <div className='transition duration-500 symbol text-3xl group-hover:rotate-90'>settings</div>
+      </button>
+
+      <Modal.Legacy open={open} onClickBackdrop={() => setOpen(false)}>
+        <Modal.Header>Settings</Modal.Header>
+
+        <Modal.Body>
+          <div className='space-y-4'>
+            <div className='space-y-1'>
+              <label htmlFor='orientation' className='font-bold text-lg'>Split Orientation</label>
+
+              <div className='flex gap-2'>
+                <label htmlFor='orientation'>Horizontal</label>
+                <Toggle color='primary' id='orientation' checked={settings.orientation === 'vertical'} onChange={() => setters.orientation(settings.orientation === 'horizontal' ? 'vertical' : 'horizontal')} />
+                <label htmlFor='orientation'>Vertical</label>
+              </div>
+            </div>
+
+            <div className='space-y-1'>
+              <label htmlFor='snap' className='font-bold text-lg'>Auto Snap to New Nodes</label>
+
+              <Toggle className='grid' color='primary' id='snap' checked={settings.autoSnapToNew} onChange={() => setters.autoSnapToNew(!settings.autoSnapToNew)} />
+            </div>
+
+            <div className='space-y-1'>
+              <label htmlFor='theme' className='font-bold text-lg'>Theme</label>
+
+              <Select className='block' value={settings.theme} onChange={(e) => setters.theme(e.currentTarget.value as SettingsSchema['theme'])}>
+                <Select.Option value='system'>System</Select.Option>
+                <Select.Option value='light'>Light</Select.Option>
+                <Select.Option value='dark'>Dark</Select.Option>
+              </Select>
+            </div>
+          </div>
+
+          <Modal.Actions>
+            <Button color='neutral' onClick={() => setOpen(false)}>Close</Button>
+          </Modal.Actions>
+        </Modal.Body>
+      </Modal.Legacy>
+    </div>
+  )
+}
 
 /**
  * Toolbar includes the logo, save button, restart button, and settings button equipped with the
  * settings pop-up.
- * @returns toolbar component
  */
 export function Toolbar (): React.ReactNode {
-  const [popupOpen, setPopupIsOpen] = useState(false)
-  const { horizontalOn, setHorizontalOn, darkModeOn, setDarkModeOn } = useSettings()
-
   return (
-    <header>
-      <div className='mainBg toolbarFont flex flex-row text-white font-bold items-center w-full rounded'>
-        <img src={logo} alt='logo' className='max-w-14 max-h-14 aspect-auto ml-8' />
-        <p className='font-bold text-xl'>Unitree</p>
-        <div className='flex flex-row justify-between w-full ml-180 mr-18'>
-          {/* Save Button (with alert functionality only) */}
-          <button className='duration-200 hover:text-[#7B3F16] hover:cursor-pointer hover:scale-110 text-lg rounded-lg h-12 w-20 aspect-auto' onClick={() => alert('Progress Saved')}>
-            Save
-          </button>
-          {/* Restart Button (with alert functionality only) */}
-          <button className='duration-200 hover:text-[#7B3F16] hover:cursor-pointer hover:scale-110 text-lg rounded-lg h-12 w-20 aspect-auto' onClick={() => alert('Progress Restarted')}>
-            Restart
-          </button>
-          {/* Settings Button (fully functional) */}
-          <button className='duration-200 hover:text-[#7B3F16] hover:cursor-pointer hover:scale-110 text-lg rounded-lg h-12 w-20 aspect-auto' onClick={() => setPopupIsOpen(true)}>
-            Settings
-          </button>
-        </div>
-      </div>
+    <header className='bg-accent text-accent-content rounded-b-md'>
+      <Navbar>
+        <Navbar.Start>
+          <img src={logo} width={56} />
+          <h1 className='text-3xl font-bold ml-2 scale-y-110'>Unitree</h1>
+        </Navbar.Start>
 
-      {/* Pop-up (not functional) */}
-      {popupOpen && (
-        <div className='fixed inset-26 inset-x-120 toolbarFont mainBg text-white rounded flex flex-col items-center justify-center z-50'>
-          <div className='justify-items-between h-1/2 w-1/2'>
-            <h1 className='mb-5 text-xl font-bold'>Settings</h1>
-            {/* Checkboxes (not functional) */}
-            <div className='flex flex-col'>
-              <label className='hover:cursor-pointer'>
-                <input type='checkbox' className='hover:cursor-pointer' checked={horizontalOn} onChange={(e) => { setHorizontalOn(e.target.checked) }} />
-                Horizonal Divider
-              </label>
-              <label className='hover:cursor-pointer'>
-                <input type='checkbox' className='hover:cursor-pointer' checked={darkModeOn} onChange={(e) => { setDarkModeOn(e.target.checked) }} />
-                Dark Mode
-              </label>
-            </div>
-          </div>
-          <div>
-            {/* Close Button for Pop-up (fully functional) */}
-            <button className='font-bold duration-200 hover:text-[#7B3F16] hover:cursor-pointer hover:scale-110 text-lg rounded-lg h-12 w-20 aspect-auto' onClick={() => setPopupIsOpen(false)}>Close</button>
-          </div>
-        </div>
-      )}
+        <Navbar.End>
+          <SettingsButton />
+        </Navbar.End>
+      </Navbar>
     </header>
   )
 }

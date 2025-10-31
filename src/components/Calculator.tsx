@@ -28,7 +28,7 @@ function ImplicitNotifier (): React.ReactNode {
     tree.addEventListener('implicit', () => {
       setTimeout(handleShow, 500)
       aborter.abort()
-    }, { signal: aborter.signal })
+    }, { signal: aborter.signal, passive: true })
 
     return () => aborter.abort()
   }, [tree, handleShow])

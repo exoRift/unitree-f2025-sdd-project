@@ -3,10 +3,10 @@ import { createRoot } from 'react-dom/client'
 
 import 'mathlive'
 
-import App from './App.tsx'
+import Session from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <Session />
   </StrictMode>
 )
