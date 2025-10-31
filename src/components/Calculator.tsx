@@ -89,7 +89,7 @@ export function Calculator (): React.ReactNode {
     let position = input.selection.ranges[0]?.[0] ?? 1
     do {
       --position
-    } while (position >= 0 && value[position].match(/[0-9.]/))
+    } while (position >= 0 && value[position]!.match(/[0-9.]/))
 
     if (value[Math.max(0, position)] === '-') value = value.slice(0, position) + value.slice(position + 1, value.length)
     else value = value.slice(0, position + 1) + '-' + value.slice(position + 1, value.length)
@@ -146,8 +146,8 @@ export function Calculator (): React.ReactNode {
               : null}
         </div>
       </form>
-      <div className='flex max-lg:flex-col max-lg:items-center justify-center gap-4'>
-        <div id='container' className='grid grid-cols-4 gap-1 place-items-center'>
+      <div className='flex flex-wrap max-lg:items-center justify-center gap-4'>
+        <div id='container' className='grid grid-cols-[repeat(4,1fr)] gap-1 place-items-center'>
           {[
             { label: 'cos', symbol: '\\cos{\\placeholder{}}', italic: true },
             { label: 'sin', symbol: '\\sin{\\placeholder{}}', italic: true },
@@ -178,7 +178,7 @@ export function Calculator (): React.ReactNode {
             </Button>
           ))}
         </div>
-        <div id='container' className='grid grid-cols-4 gap-1 place-items-center'>
+        <div id='container' className='grid grid-cols-[repeat(4,1fr)] gap-1 place-items-center'>
           {[
             '4', '5', '6', '/', '7', '8', '9', '*', '1', '2', '3', '+', '+/-', '0', '.', '-'
           ].map((label, i) => (
