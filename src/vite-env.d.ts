@@ -2,6 +2,10 @@
 
 import type { MathfieldElement, MathfieldElementAttributes } from 'mathlive'
 
+declare global {
+  type ContextType<T> = T extends React.Context<infer U> ? U : never
+}
+
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {

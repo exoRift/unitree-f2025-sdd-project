@@ -1,13 +1,18 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
-import { Tree } from '../lib/history'
-import { HistoryCalculator } from '../lib/calculator'
+import { SessionManager } from '../lib/session'
 
-export const HistoryContext = createContext((() => {
-  const tree = new Tree()
+export const SessionContext = createContext((() => {
+  const session = new SessionManager()
+
   return {
-    tree,
-    calculator: new HistoryCalculator(tree)
+    session,
+    get tree () {
+      return session.tree
+    },
+    get calculator () {
+      return session.calculator
+    }
   }
 })())
 
@@ -15,13 +20,13 @@ export const HistoryContext = createContext((() => {
  * This is a hook that returns the history context, subscribed to mutations for updates
  * @returns A tree
  */
-export function useCalculator (): { tree: Tree, calculator: HistoryCalculator } {
+export function useCalculator (): ContextType<typeof SessionContext> {
   const [, setSignal] = useState(0)
-  const ctx = useContext(HistoryContext)
+  const ctx = useContext(SessionContext)
 
   useEffect(() => {
     const aborter = new AbortController()
-    ctx.tree.addEventListener('mutate', () => setSignal((prior) => prior + 1), { signal: aborter.signal })
+    ctx.tree.addEventListener('mutate', () => setSignal((prior) => prior + 1), { signal: aborter.signal, passive: true })
 
     return () => aborter.abort()
   }, [ctx])

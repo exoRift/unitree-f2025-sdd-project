@@ -1,14 +1,15 @@
-import { SettingsProvider, useSettings } from './hooks/useSettings'
+import { useEffect, useRef, useState } from 'react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
-import { useRef } from 'react'
+import { twMerge } from 'tailwind-merge'
 
-import { Tree } from './lib/history'
+import { SettingsProvider, useSettings } from './hooks/useSettings'
+import { SessionContext, useCalculator } from './hooks/useCalculator'
+import { SessionManager } from './lib/session'
+import { HistoryTree } from './components/HistoryTree'
+import { HistoryCalculator } from './lib/calculator'
 
 import { Toolbar } from './components/Toolbar'
-import { HistoryTree } from './components/HistoryTree'
 import { Calculator } from './components/Calculator'
-import { HistoryCalculator } from './lib/calculator'
-import { HistoryContext } from './hooks/useCalculator'
 
 /**
  * A stylized resize handle
@@ -24,28 +25,52 @@ function ResizeHandle (): React.ReactNode {
 }
 
 /**
+ * A save icon to be displayed when saving the session state
+ */
+function SaveIcon (): React.ReactNode {
+  const { session } = useCalculator()
+
+  const [shown, setShown] = useState(false)
+
+  useEffect(() => {
+    const aborter = new AbortController()
+
+    session.addEventListener('saving', () => setShown(true), { signal: aborter.signal, passive: true })
+    session.addEventListener('saved', () => setShown(false), { signal: aborter.signal, passive: true })
+
+    return () => aborter.abort()
+  }, [session])
+
+  return (
+    <div className='fixed bottom-2 left-2'>
+      <div className={twMerge('transition symbol animate-spin', shown ? 'opacity-100' : 'opacity-0')}>save</div>
+    </div>
+  )
+}
+
+/**
  * Contains application components
  * @returns Unitree layout equipped with the Toolbar, History-Tree, resizable panel divider, and
- * Calculator
+ *  Calculator
  */
-function AppContext (): React.ReactNode {
-  const { horizontalOn, setHorizontalOn } = useSettings()
+function App (): React.ReactNode {
+  const { settings } = useSettings()
 
   return (
     <div className='min-h-screen grid grid-rows-[auto_1fr] grid-cols-1'>
-      <Toolbar horizontalOn={horizontalOn} setHorizontalOn={setHorizontalOn} />
+      <Toolbar />
 
-      <PanelGroup autoSaveId='treecalcsplit' direction={horizontalOn ? 'vertical' : 'horizontal'}>
+      <PanelGroup autoSaveId='treecalcsplit' direction={settings.orientation}>
         <Panel id='historytree' minSize={15}>
           <HistoryTree />
         </Panel>
         <ResizeHandle />
         <Panel id='calculator' minSize={40}>
-          <div className='flex-1 h-full overflow-auto'>
-            <Calculator />
-          </div>
+          <Calculator />
         </Panel>
       </PanelGroup>
+
+      <SaveIcon />
     </div>
   )
 }
@@ -53,18 +78,27 @@ function AppContext (): React.ReactNode {
 /**
  * The main app
  */
-export default function App (): React.ReactNode {
+export default function Session (): React.ReactNode {
   const ctx = useRef((() => {
-    const tree = new Tree()
+    const session = new SessionManager()
+    session.recall()
+    const tree = session.tree
     const calculator = new HistoryCalculator(tree)
-    return { tree, calculator }
+    return { tree, calculator, session }
   })())
 
+  useEffect(() => {
+    const ctxVal = ctx.current
+    ctxVal.session.startAutosaving()
+
+    return () => ctxVal.session.stopAutosaving()
+  }, [])
+
   return (
-    <HistoryContext.Provider value={ctx.current}>
+    <SessionContext.Provider value={ctx.current}>
       <SettingsProvider>
-        <AppContext />
+        <App />
       </SettingsProvider>
-    </HistoryContext.Provider>
+    </SessionContext.Provider>
   )
 }

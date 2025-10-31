@@ -8,12 +8,13 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "validate": "tsc -b",
-    "preview": "vite preview",
+    "preview": "PORT=3000 vite preview",
     "update-icons": "curl -L https://github.com/google/material-design-icons/raw/master/variablefont/MaterialSymbolsOutlined%5BFILL,GRAD,opsz,wght%5D.woff2 -o public/fonts/material-symbols.woff2"
   },
   "dependencies": {
     "@cortex-js/compute-engine": "^0.30.2",
     "@tailwindcss/vite": "^4.1.12",
+    "arktype": "^2.1.25",
     "daisyui": "^5.3.8",
     "mathlive": "^0.107.1",
     "react": "^19.1.1",
@@ -33,6 +34,7 @@
     "eslint": "^9.34.0",
     "eslint-config": "github:exoRift/eslint-config",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "fast-check": "^4.3.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.2"
   }

@@ -2,7 +2,24 @@
  * For first implementation, equation type will be "unknown" until calculator backend is created
  */
 
-import type { BoxedExpression } from '@cortex-js/compute-engine'
+import { ComputeEngine, type BoxedExpression, type Expression } from '@cortex-js/compute-engine'
+
+export interface SerializedNode {
+  id: string
+  alias?: string
+  dependencies: string[]
+  rawUserEquation: string
+  parsed: Expression
+  note?: string
+  lastModified: Date
+}
+
+export interface SerializedTree {
+  idLetterIterator: number
+  idNumberIterators: Record<string, number>
+  nodes: SerializedNode[]
+  roots: string[]
+}
 
 const A_CODE = 'a'.charCodeAt(0)
 
@@ -11,12 +28,12 @@ const A_CODE = 'a'.charCodeAt(0)
  */
 export class Tree extends EventTarget {
   private idLetterIterator = 0
+  private readonly idNumberIterators = new Map<string, number>()
   private readonly nodes = new Set<TreeNode>()
-  idNumberIterators = new Map<string, number>()
 
-  roots = new Set<TreeNode>()
-  idLookup = new Map<string, TreeNode>()
-  aliasLookup = new Map<string, TreeNode>()
+  readonly roots = new Set<TreeNode>()
+  readonly idLookup = new Map<string, TreeNode>()
+  readonly aliasLookup = new Map<string, TreeNode>()
 
   lastCreatedNode?: TreeNode
 
@@ -59,6 +76,42 @@ export class Tree extends EventTarget {
   }
 
   /**
+   * Construct a tree from a serialized representation
+   */
+  constructor (serialized?: SerializedTree) {
+    super()
+
+    if (serialized) {
+      const engine = new ComputeEngine()
+
+      this.idLetterIterator = serialized.idLetterIterator
+      this.idNumberIterators = new Map(Object.entries(serialized.idNumberIterators))
+      for (const serializedNode of serialized.nodes) {
+        const node = new TreeNode(serializedNode.id, serializedNode.rawUserEquation, engine.box(serializedNode.parsed))
+
+        this.nodes.add(node)
+        this.idLookup.set(node.id, node)
+        if (serializedNode.alias) this.setAlias(node, serializedNode.alias)
+        if (serializedNode.note) this.setNote(node, serializedNode.note)
+        node.lastModified = new Date(serializedNode.lastModified)
+      }
+
+      for (const serializedNode of serialized.nodes) {
+        if (!serializedNode.dependencies.length) continue
+
+        const node = this.idLookup.get(serializedNode.id)!
+        for (const dep of serializedNode.dependencies) {
+          this.addDependency(node, this.idLookup.get(dep)!)
+        }
+      }
+
+      for (const root of serialized.roots) {
+        this.roots.add(this.idLookup.get(root)!)
+      }
+    }
+  }
+
+  /**
    * Create a new node (root, if no dependencies specified)
    * @param                 rawUserEquation The raw user input in string form
    * @param                 parsedEquation  The equation inputted by the user
@@ -76,7 +129,7 @@ export class Tree extends EventTarget {
       // If this is a descendant of more than one node, use a new letter
       const letterConstraint = dependencies.length > 1
         ? undefined
-        : dependencies[0].id.match(/^[a-z]+/)![0]
+        : dependencies[0]!.id.match(/^[a-z]+/)![0]
 
       const id = this.generateID(letterConstraint)
       node = new TreeNode(id, rawUserEquation, parsedEquation)
@@ -155,8 +208,9 @@ export class Tree extends EventTarget {
    * @throws {Error}       if node is not present in the tree
    */
   setAlias (node: TreeNode, alias: string | undefined): void {
-    if (alias === '') return
+    if (alias === '' || node.alias === alias) return
     if (!this.nodes.has(node)) throw new Error('Node not present in tree')
+    if (alias && this.aliasLookup.has(alias)) throw new Error('Alias already taken')
     if (alias) this.aliasLookup.set(alias, node)
     else if (node.alias) this.aliasLookup.delete(node.alias)
     node.alias = alias
@@ -173,6 +227,35 @@ export class Tree extends EventTarget {
     if (note === '') return
     if (!this.nodes.has(node)) throw new Error('Node not present in tree')
     node.note = note
+    this.dispatchEvent(new CustomEvent('mutate'))
+  }
+
+  /**
+   * Serialize a tree structure into an object
+   * @returns The object representation
+   */
+  serialize (): SerializedTree {
+    const nodes = Array.from(this.nodes).map((n) => n.serialize())
+    const roots = Array.from(this.roots).map((n) => n.id)
+
+    return {
+      idLetterIterator: this.idLetterIterator,
+      idNumberIterators: Object.fromEntries(this.idNumberIterators.entries()),
+      nodes,
+      roots
+    }
+  }
+
+  /**
+   * Clears the tree and resets to initial state
+   */
+  clear (): void {
+    this.lastCreatedNode = undefined
+    this.roots.clear()
+    this.nodes.clear()
+    this.aliasLookup.clear()
+    this.idLetterIterator = 0
+    this.idNumberIterators.clear()
     this.dispatchEvent(new CustomEvent('mutate'))
   }
 }
@@ -204,6 +287,22 @@ class TreeNode {
     this.rawUserEquation = rawUserEquation
     this.parsedEquation = parsedEquation
     this.lastModified = new Date()
+  }
+
+  /**
+   * Serialize a node into its object representation
+   * @returns The object representation of the node
+   */
+  serialize (): SerializedNode {
+    return {
+      id: this.id,
+      alias: this.alias,
+      dependencies: Array.from(this.dependencies).map((d) => d.id),
+      rawUserEquation: this.rawUserEquation,
+      parsed: this.parsedEquation.toJSON(),
+      note: this.note,
+      lastModified: this.lastModified
+    }
   }
 }
 

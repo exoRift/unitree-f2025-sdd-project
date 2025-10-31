@@ -12,16 +12,6 @@
   @apply cursor-default;
 }
 
-.mainBg { background-color: #B97A57; }
-.secondBg {background-color: #7B3F16;}
-.toolbarFont {font-family: Georgia;}
-.calculatorFont {font-family: "Noto Sans", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: weight;
-  font-style: normal;
-  font-variation-settings:
-    "wdth" 100;}
-
 math-field.pointer-events-none::part(content) {
   pointer-events: none;
 }
