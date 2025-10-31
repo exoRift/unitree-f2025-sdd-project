@@ -142,24 +142,57 @@ export function Calculator (): React.ReactNode {
               : null}
         </div>
       </form>
-
-      <div id='container' className='grid grid-cols-4 gap-2 mt-4 aspect-square *:h-auto max-w-96 *:text-2xl'>
-        <Button color='neutral' onClick={() => appendSymbol('7')}>7</Button>
-        <Button color='neutral' onClick={() => appendSymbol('8')}>8</Button>
-        <Button color='neutral' onClick={() => appendSymbol('9')}>9</Button>
-        <Button color='neutral' onClick={() => appendSymbol('*')}>*</Button>
-        <Button color='neutral' onClick={() => appendSymbol('4')}>4</Button>
-        <Button color='neutral' onClick={() => appendSymbol('5')}>5</Button>
-        <Button color='neutral' onClick={() => appendSymbol('6')}>6</Button>
-        <Button color='neutral' onClick={() => appendSymbol('/')}>/</Button>
-        <Button color='neutral' onClick={() => appendSymbol('1')}>1</Button>
-        <Button color='neutral' onClick={() => appendSymbol('2')}>2</Button>
-        <Button color='neutral' onClick={() => appendSymbol('3')}>3</Button>
-        <Button color='neutral' onClick={() => appendSymbol('+')}>+</Button>
-        <Button color='neutral' onClick={negate}>+/-</Button>
-        <Button color='neutral' onClick={() => appendSymbol('0')}>0</Button>
-        <Button color='neutral' onClick={() => appendSymbol('.')}>.</Button>
-        <Button color='neutral' onClick={() => appendSymbol('-')}>-</Button>
+      <div className='gap-2 grid grid-cols-[repeat(4,26rem)]'>
+        <div id='container' className='grid grid-cols-[repeat(4,6rem)] grid-rows-[repeat(4,6rem)] gap-2 mt-4 *:w-full *:h-full *:text-2xl *:brightness-150'>
+          {[
+            { label: 'cos', symbol: '\\cos{\\placeholder}', italic: true },
+            { label: 'sin', symbol: '\\sin{\\placeholder}', italic: true },
+            { label: 'tan', symbol: '\\tan{\\placeholder}', italic: true },
+            { label: 'θ', symbol: '\\theta', italic: true },
+            { label: 'e', symbol: 'e' },
+            { label: '\\ln', symbol: '\\ln{\\placeholder}' },
+            { label: '\\log', symbol: '\\log{\\placeholder}' },
+            { label: '\\pi', symbol: '\\pi' },
+            { label: '\\sqrt{\\placeholder}', symbol: '\\sqrt{\\placeholder}' },
+            { label: 'x^\\placeholder', symbol: 'x^{\\placeholder}' },
+            { label: '{\\placeholder}^2', symbol: '{\\placeholder}^2' },
+            { label: '\\frac', symbol: '\\frac{\\placeholder}' },
+            { label: '\\frac{d}{dx}', symbol: '(\\Box)\\prime' },
+            { label: '∫', symbol: '\\int{\\placeholder}dx' },
+            { label: '\\int_\\Box^\\Box \\Box', symbol: '\\int_\\Box^\\Box \\Box dx' },
+            { label: '{\\placeholder}!', symbol: '{\\placeholder}!' }
+          ].map((btn, i) => (
+            <Button
+              key={i}
+              color='neutral'
+              className={`w-20 h-20 text-2xl ${btn.italic ? 'italic' : ''}`}
+              onClick={() => appendSymbol(btn.symbol)}
+            >
+              <math-field read-only className='bg-transparent text-white'>
+                {btn.label}
+              </math-field>
+            </Button>
+          ))}
+        </div>
+        <div id='container' className='grid grid-cols-[repeat(4,6rem)] grid-rows-[repeat(4,6rem)] gap-2 mt-4 *:w-full *:h-full *:text-2xl'>
+          {[
+            '4', '5', '6', '/', '7', '8', '9', '*', '1', '2', '3', '+', '+/-', '0', '.', '-'
+          ].map((label, i) => (
+            <Button
+              key={i}
+              color='neutral'
+              className={`w-20 h-20 text-2x1' ${
+                ['*', '/', '+', '-'].includes(label) ? 'brightness-150' : ''
+              }`}
+              onClick={() => {
+                if (label === '+/-') negate()
+                else appendSymbol(label)
+              }}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   )
