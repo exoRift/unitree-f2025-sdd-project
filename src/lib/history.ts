@@ -129,7 +129,7 @@ export class Tree extends EventTarget {
       // If this is a descendant of more than one node, use a new letter
       const letterConstraint = dependencies.length > 1
         ? undefined
-        : dependencies[0].id.match(/^[a-z]+/)![0]
+        : dependencies[0]!.id.match(/^[a-z]+/)![0]
 
       const id = this.generateID(letterConstraint)
       node = new TreeNode(id, rawUserEquation, parsedEquation)
