@@ -65,7 +65,7 @@ function App (): React.ReactNode {
           <HistoryTree />
         </Panel>
         <ResizeHandle />
-        <Panel id='calculator' minSize={40}>
+        <Panel id='calculator' minSize={40} defaultSize={50}>
           <Calculator />
         </Panel>
       </PanelGroup>

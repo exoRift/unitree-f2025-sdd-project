@@ -111,89 +111,91 @@ export function Calculator (): React.ReactNode {
   }, [calculator])
 
   return (
-    <div className='p-4'>
+    <div className='p-4 flex flex-col h-full overflow-auto'>
       <ImplicitNotifier />
 
-      <h1 className='text-2xl font-semibold mb-4'>Enter an equation below...</h1>
-      <form onSubmit={submitEquation} className='mb-4'>
-        <div className='flex gap-4 mb-4'>
-          <math-field onInput={updatePreview} onKeyDown={(e) => e.key === 'Enter' && !e.defaultPrevented && e.currentTarget.closest('form')?.requestSubmit()} data-gramm='false' id='eqInput' className='w-2/3 grow border-2' />
-          <span className='font-bold text-xl leading-none opacity-50 self-center'>=</span>
-          <math-field id='eqPreview' read-only className='w-1/3 grow opacity-50 border text-xl' />
-        </div>
+      <div className='h-0 grow'>
+        <h1 className='text-2xl font-semibold mb-4'>Enter an equation below...</h1>
+        <form onSubmit={submitEquation} className='mb-4'>
+          <div className='flex gap-4 mb-4'>
+            <math-field onInput={updatePreview} onKeyDown={(e) => e.key === 'Enter' && !e.defaultPrevented && e.currentTarget.closest('form')?.requestSubmit()} data-gramm='false' id='eqInput' className='w-2/3 grow border-2' />
+            <span className='font-bold text-xl leading-none opacity-50 self-center'>=</span>
+            <math-field id='eqPreview' read-only className='w-1/3 grow opacity-50 border text-xl' />
+          </div>
 
-        <div className='flex gap-4 justify-between'>
-          <Button type='submit' color='primary' className='pl-3'>
-            <div className='symbol'>subdirectory_arrow_left</div>
-            <span>Evaluate & Save</span>
-          </Button>
+          <div className='flex gap-4 justify-between'>
+            <Button type='submit' color='primary' className='pl-3'>
+              <div className='symbol'>subdirectory_arrow_left</div>
+              <span>Evaluate & Save</span>
+            </Button>
 
-          {errors
-            ? (
-              <p className='text-error' key='result'>
-                {errors.map((e, i) => (
-                  <span key={i} className='not-last:after:content-["_|_"] after:text-base-content/50 after:font-bold'>{e.toString()}</span>
-                ))}
-              </p>
-            )
-            : tree.lastCreatedNode
+            {errors
               ? (
-                <p className='opacity-60 inline-flex items-start' key='result'>
-                  <math-field read-only>{'\\text{Last equation: }'}</math-field>
-                  <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} showNumeric />
+                <p className='text-error' key='result'>
+                  {errors.map((e, i) => (
+                    <span key={i} className='not-last:after:content-["_|_"] after:text-base-content/50 after:font-bold'>{e.toString()}</span>
+                  ))}
                 </p>
               )
-              : null}
-        </div>
-      </form>
-      <div className='flex flex-wrap max-lg:items-center justify-center gap-4'>
-        <div id='container' className='grid grid-cols-[repeat(4,1fr)] gap-1 place-items-center'>
-          {[
-            { label: 'cos', symbol: '\\cos{\\placeholder{}}', italic: true },
-            { label: 'sin', symbol: '\\sin{\\placeholder{}}', italic: true },
-            { label: 'tan', symbol: '\\tan{\\placeholder{}}', italic: true },
-            { label: 'θ', symbol: '\\theta', italic: true },
-            { label: 'e', symbol: 'e' },
-            { label: '\\ln', symbol: '\\ln{\\placeholder{}}' },
-            { label: '\\log', symbol: '\\log{\\placeholder{}}' },
-            { label: '\\pi', symbol: '\\pi' },
-            { label: '\\sqrt{\\placeholder{}}', symbol: '\\sqrt{\\placeholder{}}' },
-            { label: 'x^\\placeholder{}', symbol: 'x^{\\placeholder{}}' },
-            { label: '{\\placeholder{}}^2', symbol: '{\\placeholder{}}^2' },
-            { label: '\\tiny{\\frac{\\placeholder{}}{{\\placeholder{}}}}', symbol: '\\frac{\\placeholder{}}{{\\placeholder{}}}', inflate: true },
-            { label: '\\frac{d}{dx}', symbol: '(\\Box)\\prime' },
-            { label: '∫', symbol: '\\int{\\placeholder{}}dx' },
-            { label: '\\int_{\\placeholder{}}^{\\placeholder{}}\\placeholder{}', symbol: '\\int_{\\placeholder{}}^{\\placeholder{}}\\placeholder{} dx' },
-            { label: '{\\placeholder{}}!', symbol: '{\\placeholder{}}!' }
-          ].map((btn, i) => (
-            <Button
-              key={i}
-              color='neutral'
-              className={twMerge('w-20 h-20 text-2xl', btn.italic && 'italic', btn.inflate && 'text-4xl')}
-              onClick={() => appendSymbol(btn.symbol)}
-            >
-              <math-field read-only className='bg-transparent text-white pointer-events-none'>
-                {btn.label}
-              </math-field>
-            </Button>
-          ))}
-        </div>
-        <div id='container' className='grid grid-cols-[repeat(4,1fr)] gap-1 place-items-center'>
-          {[
-            '4', '5', '6', '/', '7', '8', '9', '*', '1', '2', '3', '+', '+/-', '0', '.', '-'
-          ].map((label, i) => (
-            <Button
-              key={i}
-              color='neutral'
-              className={twMerge('w-20 h-20 text-2xl', ['*', '/', '+', '-'].includes(label) && 'brightness-150')}
-              onClick={() => {
-                if (label === '+/-') negate()
-                else appendSymbol(label)
-              }}
-            >
-              {label}
-            </Button>
-          ))}
+              : tree.lastCreatedNode
+                ? (
+                  <p className='opacity-60 inline-flex items-start' key='result'>
+                    <math-field read-only>{'\\text{Last equation: }'}</math-field>
+                    <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} showNumeric />
+                  </p>
+                )
+                : null}
+          </div>
+        </form>
+        <div className='flex flex-wrap max-lg:items-center justify-center gap-4'>
+          <div id='container' className='grid grid-cols-[repeat(4,1fr)] gap-1 place-items-center'>
+            {[
+              { label: 'cos', symbol: '\\cos{\\placeholder{}}', italic: true },
+              { label: 'sin', symbol: '\\sin{\\placeholder{}}', italic: true },
+              { label: 'tan', symbol: '\\tan{\\placeholder{}}', italic: true },
+              { label: 'θ', symbol: '\\theta', italic: true },
+              { label: 'e', symbol: 'e' },
+              { label: '\\ln', symbol: '\\ln{\\placeholder{}}' },
+              { label: '\\log', symbol: '\\log{\\placeholder{}}' },
+              { label: '\\pi', symbol: '\\pi' },
+              { label: '\\sqrt{\\placeholder{}}', symbol: '\\sqrt{\\placeholder{}}' },
+              { label: 'x^\\placeholder{}', symbol: 'x^{\\placeholder{}}' },
+              { label: '{\\placeholder{}}^2', symbol: '{\\placeholder{}}^2' },
+              { label: '\\tiny{\\frac{\\placeholder{}}{{\\placeholder{}}}}', symbol: '\\frac{\\placeholder{}}{{\\placeholder{}}}', inflate: true },
+              { label: '\\frac{d}{dx}', symbol: '(\\placeholder{})\\prime' },
+              { label: '∫', symbol: '\\int{\\placeholder{}}dx' },
+              { label: '\\int_{\\placeholder{}}^{\\placeholder{}}\\placeholder{}', symbol: '\\int_{\\placeholder{}}^{\\placeholder{}}\\placeholder{} dx' },
+              { label: '{\\placeholder{}}!', symbol: '{\\placeholder{}}!' }
+            ].map((btn, i) => (
+              <Button
+                key={i}
+                color='neutral'
+                className={twMerge('w-20 h-20 text-2xl', btn.italic && 'italic', btn.inflate && 'text-4xl')}
+                onClick={() => appendSymbol(btn.symbol)}
+              >
+                <math-field read-only className='bg-transparent text-white pointer-events-none'>
+                  {btn.label}
+                </math-field>
+              </Button>
+            ))}
+          </div>
+          <div id='container' className='grid grid-cols-[repeat(4,1fr)] gap-1 place-items-center'>
+            {[
+              '4', '5', '6', '/', '7', '8', '9', '*', '1', '2', '3', '+', '+/-', '0', '.', '-'
+            ].map((label, i) => (
+              <Button
+                key={i}
+                color='neutral'
+                className={twMerge('w-20 h-20 text-2xl', ['*', '/', '+', '-'].includes(label) && 'brightness-150')}
+                onClick={() => {
+                  if (label === '+/-') negate()
+                  else appendSymbol(label)
+                }}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
