@@ -123,7 +123,10 @@ export function Calculator (): React.ReactNode {
         </div>
 
         <div className='flex gap-4 justify-between'>
-          <Button type='submit' color='primary'>Evaluate & Save</Button>
+          <Button type='submit' color='primary' className='pl-3'>
+            <div className='symbol'>subdirectory_arrow_left</div>
+            <span>Evaluate & Save</span>
+          </Button>
 
           {errors
             ? (
