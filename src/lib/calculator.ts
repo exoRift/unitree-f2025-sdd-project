@@ -77,6 +77,9 @@ export class HistoryCalculator {
     const newDeps = dependencies.difference(node.dependencies)
     for (const newDep of newDeps) this.tree.addDependency(node, newDep)
 
+    if (node.dependencies.size) this.tree.roots.delete(node)
+    else this.tree.roots.add(node)
+
     // Update dependents, if any
     for (const dependent of node.dependents) this.refreshNode(dependent)
     return node.amortizedValue
