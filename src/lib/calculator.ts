@@ -137,6 +137,7 @@ export class HistoryCalculator {
     node.parsedEquation = parsed
     node.lastModified = new Date()
     const value = this.refreshNode(node)
+    this.tree.dispatchEvent(new CustomEvent('mutate'))
     return [parsed, value, node.dependencies]
   }
 }
