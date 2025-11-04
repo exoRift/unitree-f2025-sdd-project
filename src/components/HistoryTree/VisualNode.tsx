@@ -82,15 +82,15 @@ export function VisualNode ({ node, onAlias, onNote }: { node: TreeNode, onAlias
       root.classList.toggle('ring-4', true)
       root.classList.toggle('ring-yellow-500', true)
       for (const dependency of node.dependencies) {
-        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-2', true)
-        elem.classList.toggle('ring-blue-500', true)
+        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement | null
+        elem?.classList.toggle('ring-2', true)
+        elem?.classList.toggle('ring-blue-500', true)
       }
 
       for (const dependency of node.dependents) {
-        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-2', true)
-        elem.classList.toggle('ring-green-500', true)
+        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement | null
+        elem?.classList.toggle('ring-2', true)
+        elem?.classList.toggle('ring-green-500', true)
       }
     }, { passive: true, signal: aborter.signal })
 
@@ -98,15 +98,15 @@ export function VisualNode ({ node, onAlias, onNote }: { node: TreeNode, onAlias
       root.classList.toggle('ring-4', false)
       root.classList.toggle('ring-yellow-500', false)
       for (const dependency of node.dependencies) {
-        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-2', false)
-        elem.classList.toggle('ring-blue-500', false)
+        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement | null
+        elem?.classList.toggle('ring-2', false)
+        elem?.classList.toggle('ring-blue-500', false)
       }
 
       for (const dependency of node.dependents) {
-        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-2', false)
-        elem.classList.toggle('ring-green-500', false)
+        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement | null
+        elem?.classList.toggle('ring-2', false)
+        elem?.classList.toggle('ring-green-500', false)
       }
     }
 
