@@ -94,7 +94,7 @@ export function VisualNode ({ node, onAlias, onNote }: { node: TreeNode, onAlias
       }
     }, { passive: true, signal: aborter.signal })
 
-    root.addEventListener('mouseleave', () => {
+    function cleanup (): void {
       root.classList.toggle('ring-4', false)
       root.classList.toggle('ring-yellow-500', false)
       for (const dependency of node.dependencies) {
@@ -108,9 +108,14 @@ export function VisualNode ({ node, onAlias, onNote }: { node: TreeNode, onAlias
         elem.classList.toggle('ring-2', false)
         elem.classList.toggle('ring-green-500', false)
       }
-    }, { passive: true, signal: aborter.signal })
+    }
 
-    return () => aborter.abort()
+    root.addEventListener('mouseleave', cleanup, { passive: true, signal: aborter.signal })
+
+    return () => {
+      aborter.abort()
+      cleanup()
+    }
   }, [node.id, node.dependencies.size, node.dependents.size])
 
   const startEditing = useCallback(() => {
