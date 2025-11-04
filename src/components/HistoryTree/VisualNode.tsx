@@ -39,7 +39,7 @@ function isPrimaryDependency (dependency: TreeNode, dependent: TreeNode): boolea
  */
 export function DynamicMathfield ({ node, showNumeric, className, 'read-only': rdonly = true, ...props }: { node: TreeNode, showNumeric?: boolean } & React.ComponentProps<'math-field'>): React.ReactNode {
   return (
-    <math-field title={node.amortizedValue?.N().toString()} read-only={rdonly} className={twMerge('inline bg-transparent text-neutral-content', className)} {...props}>
+    <math-field title={rdonly ? node.amortizedValue?.N().toString() : undefined} read-only={rdonly} className={twMerge('inline bg-transparent text-neutral-content', className)} {...props}>
       {node.rawUserEquation}
       {rdonly && node.amortizedValue && !node.parsedEquation.isNumberLiteral && (
         <>
