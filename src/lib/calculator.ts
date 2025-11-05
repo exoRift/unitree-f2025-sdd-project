@@ -34,12 +34,17 @@ export class HistoryCalculator {
   private evaluateParsedExpression (parsed: BoxedExpression): [value: BoxedExpression, dependencies: Set<TreeNode>] {
     const dependencies = new Set<TreeNode>()
 
+    const unknownSymbols: string[] = []
     const symbols = parsed.symbols
     for (const symbol of symbols) {
-      if (symbol === 'ans' && this.tree.lastCreatedNode) dependencies.add(this.tree.lastCreatedNode)
+      if (symbol === 'ans' && this.tree.lastCreatedNode) {
+        dependencies.add(this.tree.lastCreatedNode)
+        continue
+      }
 
       const depNode = this.tree.idLookup.get(symbol) ?? this.tree.aliasLookup.get(symbol)
       if (depNode) dependencies.add(depNode)
+      else unknownSymbols.push(symbol)
     }
 
     const context: Record<string, BoxedExpression> = {}
@@ -58,7 +63,26 @@ export class HistoryCalculator {
     }
 
     // TODO: Prevent assignment
-    return [parsed.subs(context).evaluate(), dependencies]
+    const subbed = parsed.subs(context)
+    let result = subbed.evaluate()
+    if (result.isSame(this.engine.parse('\\bot')) && unknownSymbols.length) {
+      const variables: ['List', ...Array<['List', string, ['List', ...BoxedExpression[]]]>] = ['List']
+
+      for (const symbol of unknownSymbols) {
+        const solutions = subbed.solve([symbol])
+
+        if (solutions) {
+          const list: ['List', ...BoxedExpression[]] = ['List']
+          for (const solution of solutions) list.push(solution)
+
+          variables.push(['List', symbol, list])
+        }
+      }
+
+      if (variables.length > 1) result = this.engine.box(variables)
+    }
+
+    return [result, dependencies]
   }
 
   /**
