@@ -1,6 +1,6 @@
 import { test, expect, describe } from 'bun:test'
 import * as fc from 'fast-check'
-import { HistoryCalculator } from '../src/lib/Calculator'
+import { HistoryCalculator } from '../src/lib/calculator'
 
 /**
  * Characters allowed for a \w-style word (A–Z, a–z, 0–9, _)
