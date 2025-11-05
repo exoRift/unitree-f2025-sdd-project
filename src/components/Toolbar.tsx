@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useSettings, type SettingsSchema } from '../hooks/useSettings'
 
 import { Button, Modal, Navbar, Select, Toggle } from 'react-daisyui'
+import { WorkspaceManager } from './WorkspaceManager'
 
 import logo from '../images/unitree_logo_noWords.png'
 
@@ -75,6 +76,10 @@ export function Toolbar (): React.ReactNode {
           <img src={logo} width={56} />
           <h1 className='text-3xl font-bold ml-2 scale-y-110'>Unitree</h1>
         </Navbar.Start>
+
+        <Navbar.Center>
+          <WorkspaceManager />
+        </Navbar.Center>
 
         <Navbar.End>
           <SettingsButton />
