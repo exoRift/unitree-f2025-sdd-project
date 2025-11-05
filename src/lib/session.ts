@@ -41,27 +41,35 @@ export class SessionManager extends EventTarget {
   }
 
   /**
+   * Serialize the current state
+   * @returns The state in serialized object form
+   */
+  serialize (): SerializedTree {
+    return this.tree.serialize()
+  }
+
+  /**
    * Save the current tree state
    */
   save (): void {
-    localStorage.setItem('session:state', JSON.stringify(this.tree.serialize()))
+    localStorage.setItem('workspaces:session', JSON.stringify(this.serialize()))
   }
 
   /**
    * Recall the tree state from storage
    */
   recall (): void {
-    const old = localStorage.getItem('session:state')
+    const stored = localStorage.getItem('workspaces:session')
 
-    if (old) {
+    if (stored) {
       try {
-        const parsed = JSON.parse(old) as SerializedTree
+        const parsed = JSON.parse(stored) as SerializedTree
         this.tree = new Tree(parsed)
         this.calculator.tree = this.tree
         for (const node of this.tree.roots) this.calculator.refreshNode(node)
       } catch (err) {
-        console.error('Stored session corrupted', err, old)
-        localStorage.removeItem('session:state')
+        console.error('Stored session corrupted', err, stored)
+        localStorage.removeItem('workspaces:session')
       }
     }
   }
