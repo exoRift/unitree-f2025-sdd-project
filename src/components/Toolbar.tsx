@@ -24,7 +24,9 @@ function SettingsButton (): React.ReactNode {
       </button>
 
       <Modal.Legacy open={open} onClickBackdrop={() => setOpen(false)}>
-        <Modal.Header>Settings</Modal.Header>
+        <Modal.Header>
+          <h1 className='font-bold'>Settings</h1>
+        </Modal.Header>
 
         <Modal.Body>
           <div className='space-y-4'>

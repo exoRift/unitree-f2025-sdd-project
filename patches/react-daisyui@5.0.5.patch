@@ -1,0 +1,90 @@
+diff --git a/node_modules/react-daisyui/.bun-tag-12153a54665f40f b/.bun-tag-12153a54665f40f
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/react-daisyui/.bun-tag-236b5cf5019d5e9e b/.bun-tag-236b5cf5019d5e9e
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/react-daisyui/.bun-tag-b997129cd28a7de0 b/.bun-tag-b997129cd28a7de0
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/react-daisyui/.bun-tag-cf22b7829bcf7077 b/.bun-tag-cf22b7829bcf7077
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/react-daisyui.cjs b/dist/react-daisyui.cjs
+index c01cbcefd83874ef4f36685e2cc5720e93b8a9ac..516d6a20d8f25e9ed95766fc5b80b3320b8cbb4d 100644
+--- a/dist/react-daisyui.cjs
++++ b/dist/react-daisyui.cjs
+@@ -2945,14 +2945,14 @@ var useDialog = function useDialog() {
+     var _dialogRef$current2;
+     (_dialogRef$current2 = dialogRef.current) == null || _dialogRef$current2.close();
+   }, [dialogRef]);
+-  var Dialog = function Dialog(_ref2) {
++  var Dialog = useCallback(function Dialog(_ref2) {
+     var children = _ref2.children,
+       props = _objectWithoutPropertiesLoose(_ref2, _excluded2);
+     return jsxRuntime.jsx(Modal, _extends({}, props, {
+       ref: dialogRef,
+       children: children
+     }));
+-  };
++  }, [dialogRef]);
+   Dialog.displayName = 'Dialog';
+   return {
+     dialogRef: dialogRef,
+diff --git a/dist/react-daisyui.esm.js b/dist/react-daisyui.esm.js
+index 577f5b802cefb862532e03b6e209f45703ce1a00..f64c1b4028560cbef187306411af72f58eac68bf 100644
+--- a/dist/react-daisyui.esm.js
++++ b/dist/react-daisyui.esm.js
+@@ -1,5 +1,5 @@
+ import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+-import React, { forwardRef, useRef, useCallback, cloneElement, useState, useEffect, createRef, useImperativeHandle, useContext } from 'react';
++import React, { forwardRef, useRef, useCallback, cloneElement, useState, useEffect, createRef, useImperativeHandle, useContext, memo } from 'react';
+ 
+ function _extends() {
+   return _extends = Object.assign ? Object.assign.bind() : function (n) {
+@@ -2941,14 +2941,14 @@ var useDialog = function useDialog() {
+     var _dialogRef$current2;
+     (_dialogRef$current2 = dialogRef.current) == null || _dialogRef$current2.close();
+   }, [dialogRef]);
+-  var Dialog = function Dialog(_ref2) {
++  var Dialog = useCallback(function Dialog(_ref2) {
+     var children = _ref2.children,
+       props = _objectWithoutPropertiesLoose(_ref2, _excluded2);
+     return jsx(Modal, _extends({}, props, {
+       ref: dialogRef,
+       children: children
+     }));
+-  };
++  }, [dialogRef]);
+   Dialog.displayName = 'Dialog';
+   return {
+     dialogRef: dialogRef,
+diff --git a/dist/react-daisyui.modern.js b/dist/react-daisyui.modern.js
+index 9a0ee6bc8f44c05e026577e165c207cb6554b3ff..51a0c90c4623ab4b3cf38041dda2a43c943399af 100644
+--- a/dist/react-daisyui.modern.js
++++ b/dist/react-daisyui.modern.js
+@@ -1,5 +1,5 @@
+ import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+-import React, { forwardRef, useRef, useCallback, cloneElement, useState, useEffect, createRef, useImperativeHandle, useContext } from 'react';
++import React, { forwardRef, useRef, useCallback, cloneElement, useState, useEffect, createRef, useImperativeHandle, useContext, memo } from 'react';
+ 
+ function _extends() {
+   return _extends = Object.assign ? Object.assign.bind() : function (n) {
+@@ -2959,7 +2959,7 @@ const useDialog = () => {
+     var _dialogRef$current2;
+     (_dialogRef$current2 = dialogRef.current) == null || _dialogRef$current2.close();
+   }, [dialogRef]);
+-  const Dialog = _ref2 => {
++  const Dialog = useCallback(_ref2 => {
+     let {
+         children
+       } = _ref2,
+@@ -2968,7 +2968,7 @@ const useDialog = () => {
+       ref: dialogRef,
+       children: children
+     }));
+-  };
++  }, [dialogRef]);
+   Dialog.displayName = 'Dialog';
+   return {
+     dialogRef,

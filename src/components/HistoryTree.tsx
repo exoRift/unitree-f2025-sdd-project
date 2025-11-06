@@ -49,8 +49,8 @@ export function HistoryTree (): React.ReactNode {
   const setNote = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     if (!notingNode) return
     if (((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement).value === 'remove') {
-      setNotingNode(null)
       tree.setNote(notingNode, undefined)
+
       return
     }
 
@@ -58,7 +58,6 @@ export function HistoryTree (): React.ReactNode {
     const note = data.get('note') as string
 
     tree.setNote(notingNode, note)
-    setNotingNode(null)
   }, [tree, notingNode])
 
   useEffect(() => {
@@ -105,8 +104,8 @@ export function HistoryTree (): React.ReactNode {
       <AliasDialog backdrop>
         <form method='dialog' onSubmit={setAlias}>
           <Modal.Header>
-            <h1>Add alias</h1>
-            <h2 className='strong'>{aliasingNode?.id}</h2>
+            <h1 className='font-bold'>Add alias</h1>
+            <h2 className='italic'>{`Node ${aliasingNode?.id ?? ''}`}</h2>
           </Modal.Header>
 
           <Modal.Body className='flex flex-col-reverse gap-4'>
@@ -141,8 +140,8 @@ export function HistoryTree (): React.ReactNode {
       <NoteDialog backdrop>
         <form method='dialog' onSubmit={setNote}>
           <Modal.Header>
-            <h1>Add Note</h1>
-            <h2 className='strong'>{notingNode?.id}</h2>
+            <h1 className='font-bold'>Add alias</h1>
+            <h2 className='italic'>{`Node ${notingNode?.id ?? ''}`}</h2>
           </Modal.Header>
 
           <Modal.Body className='flex flex-col-reverse gap-4'>
@@ -162,7 +161,9 @@ export function HistoryTree (): React.ReactNode {
       </NoteDialog>
 
       <Dialog>
-        <Modal.Header>Clear History</Modal.Header>
+        <Modal.Header>
+          <h1 className='font-bold'>Clear History</h1>
+        </Modal.Header>
 
         <Modal.Body>
           <Modal.Body>

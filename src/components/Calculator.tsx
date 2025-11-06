@@ -12,7 +12,7 @@ import { twMerge } from 'tailwind-merge'
  * A component that displays a modal the first time an implicit dependency is formed
  */
 function ImplicitNotifier (): React.ReactNode {
-  const { tree } = useCalculator()
+  const { tree } = useCalculator(true)
   const { Dialog, handleShow, handleHide } = Modal.useDialog()
 
   const dismiss = useCallback(() => {
@@ -37,7 +37,7 @@ function ImplicitNotifier (): React.ReactNode {
   return (
     <Dialog>
       <Modal.Header>
-        <h1>Implicit Dependency</h1>
+        <h1 className='font-bold'>Implicit Dependency</h1>
       </Modal.Header>
 
       <Modal.Body>

@@ -10,6 +10,7 @@ import { HistoryCalculator } from './lib/calculator'
 
 import { Toolbar } from './components/Toolbar'
 import { Calculator } from './components/Calculator'
+import { WorkspaceManager } from './lib/workspaces'
 
 /**
  * A stylized resize handle
@@ -28,7 +29,7 @@ function ResizeHandle (): React.ReactNode {
  * A save icon to be displayed when saving the session state
  */
 function SaveIcon (): React.ReactNode {
-  const { session } = useCalculator()
+  const { session } = useCalculator(true)
 
   const [shown, setShown] = useState(false)
 
@@ -82,9 +83,11 @@ export default function Session (): React.ReactNode {
   const ctx = useRef((() => {
     const session = new SessionManager()
     session.recall()
+    const workspaces = new WorkspaceManager(session)
+    workspaces.loadFromStorage()
     const tree = session.tree
     const calculator = new HistoryCalculator(tree)
-    return { tree, calculator, session }
+    return { session, workspaces, tree, calculator }
   })())
 
   useEffect(() => {

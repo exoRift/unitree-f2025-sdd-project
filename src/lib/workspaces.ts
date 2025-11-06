@@ -11,8 +11,8 @@ export interface Workspace {
  * Manage saved workspaces
  */
 export class WorkspaceManager {
-  sessionManager: SessionManager
-  workspaces = new Map<string, Workspace>()
+  private readonly sessionManager: SessionManager
+  readonly workspaces = new Map<string, Workspace>()
 
   /**
    * Construct a WorkspaceManager
@@ -62,7 +62,7 @@ export class WorkspaceManager {
    * Load workspaces from storage into memory
    */
   loadFromStorage (): void {
-    this.workspaces = new Map()
+    this.workspaces.clear()
     const saved = localStorage.getItem('workspaces:saved')
     if (saved === null) return
 
@@ -74,5 +74,12 @@ export class WorkspaceManager {
         createdAt: new Date(workspace.createdAt)
       })
     }
+  }
+
+  /**
+   * Mount a workspace into the active session
+   */
+  recall (workspace: Workspace): void {
+    this.sessionManager.loadSession(workspace.data)
   }
 }

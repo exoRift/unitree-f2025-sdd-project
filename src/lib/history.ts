@@ -76,39 +76,61 @@ export class Tree extends EventTarget {
   }
 
   /**
+   * Populate data from a serialized tree into this instance
+   */
+  private populateData (serialized: SerializedTree): void {
+    const engine = new ComputeEngine()
+
+    this.idLetterIterator = serialized.idLetterIterator
+    for (const letter in serialized.idNumberIterators) {
+      this.idNumberIterators.set(letter, serialized.idNumberIterators[letter]!)
+    }
+
+    for (const serializedNode of serialized.nodes) {
+      const node = new TreeNode(serializedNode.id, serializedNode.rawUserEquation, engine.box(serializedNode.parsed))
+
+      this.nodes.add(node)
+      this.idLookup.set(node.id, node)
+      if (serializedNode.alias) this.setAlias(node, serializedNode.alias)
+      if (serializedNode.note) this.setNote(node, serializedNode.note)
+      node.lastModified = new Date(serializedNode.lastModified)
+    }
+
+    for (const serializedNode of serialized.nodes) {
+      if (!serializedNode.dependencies.length) continue
+
+      const node = this.idLookup.get(serializedNode.id)!
+      for (const dep of serializedNode.dependencies) {
+        this.addDependency(node, this.idLookup.get(dep)!)
+      }
+    }
+
+    for (const root of serialized.roots) {
+      this.roots.add(this.idLookup.get(root)!)
+    }
+  }
+
+  /**
    * Construct a tree from a serialized representation
    */
   constructor (serialized?: SerializedTree) {
     super()
 
-    if (serialized) {
-      const engine = new ComputeEngine()
+    if (serialized) this.populateData(serialized)
+  }
 
-      this.idLetterIterator = serialized.idLetterIterator
-      this.idNumberIterators = new Map(Object.entries(serialized.idNumberIterators))
-      for (const serializedNode of serialized.nodes) {
-        const node = new TreeNode(serializedNode.id, serializedNode.rawUserEquation, engine.box(serializedNode.parsed))
-
-        this.nodes.add(node)
-        this.idLookup.set(node.id, node)
-        if (serializedNode.alias) this.setAlias(node, serializedNode.alias)
-        if (serializedNode.note) this.setNote(node, serializedNode.note)
-        node.lastModified = new Date(serializedNode.lastModified)
-      }
-
-      for (const serializedNode of serialized.nodes) {
-        if (!serializedNode.dependencies.length) continue
-
-        const node = this.idLookup.get(serializedNode.id)!
-        for (const dep of serializedNode.dependencies) {
-          this.addDependency(node, this.idLookup.get(dep)!)
-        }
-      }
-
-      for (const root of serialized.roots) {
-        this.roots.add(this.idLookup.get(root)!)
-      }
-    }
+  /**
+   * Load a serialized tree into this current tree
+   */
+  loadSerialized (serialized: SerializedTree): void {
+    this.nodes.clear()
+    this.roots.clear()
+    this.aliasLookup.clear()
+    this.idLookup.clear()
+    this.idNumberIterators.clear()
+    this.lastCreatedNode = undefined
+    this.populateData(serialized)
+    this.dispatchEvent(new CustomEvent('mutate'))
   }
 
   /**

@@ -64,14 +64,20 @@ export class SessionManager extends EventTarget {
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as SerializedTree
-        this.tree = new Tree(parsed)
-        this.calculator.tree = this.tree
-        for (const node of this.tree.roots) this.calculator.refreshNode(node)
+        this.loadSession(parsed)
       } catch (err) {
         console.error('Stored session corrupted', err, stored)
         localStorage.removeItem('workspaces:session')
       }
     }
+  }
+
+  /**
+   * Load a session from its serialized data
+   * @param data The serialized data
+   */
+  loadSession (data: SerializedTree): void {
+    this.tree.loadSerialized(data)
   }
 
   /**
