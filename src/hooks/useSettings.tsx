@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 const SettingsSchema = type({
   orientation: type('"horizontal" | "vertical"').default('horizontal'),
-  autoSnapToNew: type.boolean.default(false),
+  autoSnapToNew: type.boolean.default(true),
   theme: type('"light" | "dark" | "system"').default('system')
 })
 

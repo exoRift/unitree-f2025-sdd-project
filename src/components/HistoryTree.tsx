@@ -100,7 +100,7 @@ export function HistoryTree (): React.ReactNode {
         ))}
       </div>
 
-      <Button variant='link' className='absolute bottom-0 right-0' onClick={handleShow}>Clear History</Button>
+      <Button variant='link' className='absolute bottom-1 right-1' onClick={handleShow}>Clear History</Button>
 
       <AliasDialog backdrop>
         <form method='dialog' onSubmit={setAlias}>

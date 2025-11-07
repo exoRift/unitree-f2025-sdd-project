@@ -39,7 +39,7 @@ function isPrimaryDependency (dependency: TreeNode, dependent: TreeNode): boolea
  */
 export function DynamicMathfield ({ node, showNumeric, className, 'read-only': rdonly = true, ...props }: { node: TreeNode, showNumeric?: boolean } & React.ComponentProps<'math-field'>): React.ReactNode {
   return (
-    <math-field title={node.amortizedValue?.N().toString()} read-only={rdonly} className={twMerge('inline bg-transparent text-neutral-content', className)} {...props}>
+    <math-field title={rdonly ? node.amortizedValue?.N().toString() : undefined} read-only={rdonly} className={twMerge('inline bg-transparent text-neutral-content', className)} {...props}>
       {node.rawUserEquation}
       {rdonly && node.amortizedValue && !node.parsedEquation.isNumberLiteral && (
         <>
@@ -82,35 +82,40 @@ export function VisualNode ({ node, onAlias, onNote }: { node: TreeNode, onAlias
       root.classList.toggle('ring-4', true)
       root.classList.toggle('ring-yellow-500', true)
       for (const dependency of node.dependencies) {
-        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-2', true)
-        elem.classList.toggle('ring-blue-500', true)
+        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement | null
+        elem?.classList.toggle('ring-2', true)
+        elem?.classList.toggle('ring-blue-500', true)
       }
 
       for (const dependency of node.dependents) {
-        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-2', true)
-        elem.classList.toggle('ring-green-500', true)
+        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement | null
+        elem?.classList.toggle('ring-2', true)
+        elem?.classList.toggle('ring-green-500', true)
       }
     }, { passive: true, signal: aborter.signal })
 
-    root.addEventListener('mouseleave', () => {
+    function cleanup (): void {
       root.classList.toggle('ring-4', false)
       root.classList.toggle('ring-yellow-500', false)
       for (const dependency of node.dependencies) {
-        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-2', false)
-        elem.classList.toggle('ring-blue-500', false)
+        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement | null
+        elem?.classList.toggle('ring-2', false)
+        elem?.classList.toggle('ring-blue-500', false)
       }
 
       for (const dependency of node.dependents) {
-        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement
-        elem.classList.toggle('ring-2', false)
-        elem.classList.toggle('ring-green-500', false)
+        const elem = document.getElementById(`node_${dependency.id}`) as HTMLDivElement | null
+        elem?.classList.toggle('ring-2', false)
+        elem?.classList.toggle('ring-green-500', false)
       }
-    }, { passive: true, signal: aborter.signal })
+    }
 
-    return () => aborter.abort()
+    root.addEventListener('mouseleave', cleanup, { passive: true, signal: aborter.signal })
+
+    return () => {
+      aborter.abort()
+      cleanup()
+    }
   }, [node.id, node.dependencies.size, node.dependents.size])
 
   const startEditing = useCallback(() => {
