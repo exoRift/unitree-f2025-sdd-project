@@ -181,7 +181,7 @@ export function VisualNode ({ node, onAlias, onNote }: { node: TreeNode, onAlias
             <Fragment key={n.id}>
               <Xarrow divContainerStyle={{ zIndex: -1 }} start={`node_${node.id}`} end={`node_${n.id}`} path='straight' headSize={3} color={isPrimary ? 'var(--color-secondary)' : 'var(--color-accent)'} />
 
-              {isPrimary && <VisualNode node={n} onAlias={() => onAlias(node)} onNote={() => onNote(node)} />}
+              {isPrimary && <VisualNode node={n} onAlias={onAlias} onNote={onNote} />}
             </Fragment>
           )
         })}
