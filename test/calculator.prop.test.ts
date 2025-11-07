@@ -1,5 +1,5 @@
 import { describe, test } from 'bun:test'
-import { HistoryCalculator } from '../src/lib/Calculator'
+import { HistoryCalculator } from '../src/lib/calculator'
 import { Tree } from '../src/lib/history'
 import * as fc from 'fast-check'
 import type { BoxedExpression } from '@cortex-js/compute-engine'

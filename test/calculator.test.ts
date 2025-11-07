@@ -1,4 +1,4 @@
-import { HistoryCalculator } from '../src/lib/Calculator'
+import { HistoryCalculator } from '../src/lib/calculator'
 import type { BoxedExpression } from '@cortex-js/compute-engine'
 import type { Tree, TreeNode } from '../src/lib/history'
 import { test, expect } from 'bun:test'
