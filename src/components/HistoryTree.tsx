@@ -77,7 +77,7 @@ export function HistoryTree (): React.ReactNode {
   return (
     <div className='relative h-full flex flex-col'>
       <div className='relative h-0 grow overflow-auto flex gap-12 p-8'>
-        {Array.from(tree.roots).map((node) => (
+        {Array.from(tree.roots).map((node, i) => (
           <VisualNode
             key={node.id}
             node={node}
@@ -95,6 +95,7 @@ export function HistoryTree (): React.ReactNode {
                 setNotingNode(n)
               }
             }}
+            rightEnd={i === tree.roots.size - 1}
           />
         ))}
       </div>

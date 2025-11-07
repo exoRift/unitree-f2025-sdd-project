@@ -54,11 +54,12 @@ export function DynamicMathfield ({ node, showNumeric, className, 'read-only': r
 /**
  * A TreeNode
  * @param props
- * @param props.node    The node
- * @param props.onAlias A callback for when the "add alias" option is clicked
- * @param props.onNote  A callback for when the "add note" option is clicked
+ * @param props.node     The node
+ * @param props.onAlias  A callback for when the "add alias" option is clicked
+ * @param props.onNote   A callback for when the "add note" option is clicked
+ * @param props.rightEnd Is this node on the right end of the screen? (context menu needs to be shifted)
  */
-export function VisualNode ({ node, onAlias, onNote }: { node: TreeNode, onAlias: (node: TreeNode) => void, onNote: (node: TreeNode) => void }): React.ReactNode {
+export function VisualNode ({ node, onAlias, onNote, rightEnd }: { node: TreeNode, onAlias: (node: TreeNode) => void, onNote: (node: TreeNode) => void, rightEnd?: boolean }): React.ReactNode {
   const fieldRef = useRef<MathfieldElement>(null)
   const { tree, calculator } = useCalculator()
 
@@ -142,7 +143,7 @@ export function VisualNode ({ node, onAlias, onNote }: { node: TreeNode, onAlias
             {node.alias && <h3 className='text-sm italic text-neutral-content/70'>{node.alias}</h3>}
           </div>
 
-          <Dropdown>
+          <Dropdown horizontal={rightEnd ? 'left' : undefined} vertical='bottom'>
             <Dropdown.Toggle button={false} role='button' className='symbol cursor-pointer'>more_vert</Dropdown.Toggle>
             <Dropdown.Menu className='bg-base-200 text-base-content w-max'>
               <Dropdown.Item onClick={startEditing}>Edit</Dropdown.Item>
