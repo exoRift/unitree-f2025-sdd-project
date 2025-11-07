@@ -78,6 +78,7 @@ export class SessionManager extends EventTarget {
    */
   loadSession (data: SerializedTree): void {
     this.tree.loadSerialized(data)
+    for (const root of this.tree.roots) this.calculator.refreshNode(root)
   }
 
   /**

@@ -2,7 +2,7 @@ import { type } from 'arktype'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 const SettingsSchema = type({
-  orientation: type('"horizontal" | "vertical"').default('horizontal'),
+  orientation: type('"horizontal" | "vertical"').default(typeof window !== 'undefined' && window.innerWidth < 500 ? 'vertical' : 'horizontal'),
   autoSnapToNew: type.boolean.default(true),
   theme: type('"light" | "dark" | "system"').default('system')
 })
@@ -56,15 +56,16 @@ export function useSettings (): { settings: SettingsSchema, setters: Setters } {
     Object.fromEntries(SettingsSchema.props.map((prop) => [
       prop.key,
       (value: unknown) => {
-        const updated = SettingsSchema({
+        const updated = {
           ...settings,
           [prop.key]: value
-        })
+        }
+        const validated = SettingsSchema(updated)
 
-        if (updated instanceof type.errors) throw updated.toTraversalError()
+        if (validated instanceof type.errors) throw validated.toTraversalError()
 
         localStorage.setItem('settings', JSON.stringify(updated))
-        setSettings(updated)
+        setSettings(validated)
       }
     ]) as any) as Setters
   , [settings, setSettings])
