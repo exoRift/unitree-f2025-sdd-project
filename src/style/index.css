@@ -15,3 +15,7 @@
 math-field.pointer-events-none::part(content) {
   pointer-events: none;
 }
+
+math-field {
+  --contains-highlight-background-color: lightgray;
+}
