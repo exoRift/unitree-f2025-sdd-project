@@ -3,7 +3,8 @@
 ## Development
 1. Install Bun from https://bun.sh/
 2. Install dependencies with `bun i`
-3. Start the dev server with `bun dev`
+3. Build custom dependencies with `bun build-deps`
+4. Start the dev server with `bun dev`
 
 To build the application, use `bun run build`
 

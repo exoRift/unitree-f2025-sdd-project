@@ -1,10 +1,11 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "calculatree",
       "dependencies": {
-        "@cortex-js/compute-engine": "^0.30.2",
+        "@cortex-js/compute-engine": "github:exoRift/compute-engine#merge",
         "@tailwindcss/vite": "^4.1.12",
         "arktype": "^2.1.25",
         "daisyui": "^5.4.5",
@@ -80,7 +81,7 @@
 
     "@babel/types": ["@babel/types@7.28.2", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.27.1" } }, "sha512-ruv7Ae4J5dUYULmeXw1gmb7rYRz57OWCPM57pHojnLq/3Z1CK2lNSLTCVjxVk1F/TZHwOZZrOWi0ur95BbLxNQ=="],
 
-    "@cortex-js/compute-engine": ["@cortex-js/compute-engine@0.30.2", "", { "dependencies": { "complex-esm": "^2.1.1-esm1", "decimal.js": "^10.6.0" } }, "sha512-Zx+iisk9WWdbxjm8EYsneIBszvjfUs7BHNwf1jBtSINIgfWGpHrTTq9vW0J59iGCFt6bOFxbmWyxNMRSmksHMA=="],
+    "@cortex-js/compute-engine": ["@cortex-js/compute-engine@github:exoRift/compute-engine#159c9f1", { "dependencies": { "complex-esm": "^2.1.1-esm1", "decimal.js": "^10.6.0" } }, "exoRift-compute-engine-159c9f1"],
 
     "@emnapi/core": ["@emnapi/core@1.5.0", "", { "dependencies": { "@emnapi/wasi-threads": "1.1.0", "tslib": "^2.4.0" } }, "sha512-sbP8GzB1WDzacS8fgNPpHlp6C9VZe+SJP3F90W9rLemaQj2PzIuTEl1qDOYQf58YIpyjViI24y9aPWCjEzY2cg=="],
 

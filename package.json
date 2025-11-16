@@ -4,15 +4,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "build-deps": "mv node_modules/@cortex-js/compute-engine ce && cd ce && bun i && bun run build && cd .. && mv ce node_modules/@cortex-js/compute-engine",
     "dev": "PORT=3000 vite",
-    "build": "tsc -b && vite build",
+    "build": "bun run build-deps && tsc -b && vite build",
     "lint": "eslint .",
     "validate": "tsc -b",
     "preview": "PORT=3000 vite preview",
     "update-icons": "curl -L https://github.com/google/material-design-icons/raw/master/variablefont/MaterialSymbolsOutlined%5BFILL,GRAD,opsz,wght%5D.woff2 -o public/fonts/material-symbols.woff2"
   },
   "dependencies": {
-    "@cortex-js/compute-engine": "^0.30.2",
+    "@cortex-js/compute-engine": "github:exoRift/compute-engine#merge",
     "@tailwindcss/vite": "^4.1.12",
     "arktype": "^2.1.25",
     "daisyui": "^5.4.5",
