@@ -147,14 +147,16 @@ export function VisualNode ({ node, onAlias, onNote, rightEnd }: { node: TreeNod
 
   return (
     <div data-collapsed={node.collapsed || null} className={twMerge('transition flex flex-col items-center gap-24 ring-1 ring-transparent rounded-2xl', !node.collapsed && '[&:has(>[data-node]_[data-collapser]:hover)]:ring-black')}>
-      <Card data-node id={`node_${node.id}`} className={twMerge('transition-[filter] relative bg-neutral text-neutral-content w-48 shrink-0 h-32 p-2', node.collapsed && 'brightness-75')} onDoubleClick={(e) => { e.preventDefault(); startEditing() }}>
+      <Card data-node id={`node_${node.id}`} className={twMerge('transition-[filter] relative bg-neutral text-neutral-content w-48 shrink-0 h-32 p-2', node.collapsed && 'brightness-75')} onDoubleClick={node.collapsed ? undefined : (e) => { e.preventDefault(); startEditing() }}>
         {node.collapsed
           ? (
             <Fragment key='content'>
-              <h1 className='text-xl font-bold'>
-                <span>{node.id}</span>
-                <span className='text-sm'>&nbsp;- Collapsed</span>
-              </h1>
+              <Card.Title className='flex gap-4 justify-between items-start'>
+                <h1 className='font-bold'>
+                  <span>{node.id}</span>
+                  <span className='text-sm'>&nbsp;- Collapsed</span>
+                </h1>
+              </Card.Title>
               {node.alias && <h3 className='text-sm italic text-neutral-content/70'>{node.alias}</h3>}
 
               <h2 className='italic text-base mt-4'>{sumSubtree(node)} descendants</h2>
@@ -210,7 +212,7 @@ export function VisualNode ({ node, onAlias, onNote, rightEnd }: { node: TreeNod
             </Fragment>
           )}
 
-        <button data-collapser className='symbol bg-neutral size-6 absolute right-1 bottom-1 cursor-pointer [:has(>&):not(:has(+*_[data-node]))>&]:hidden' title='Collapse' onClick={() => tree.toggleNodeCollapse(node)} onDoubleClick={(e) => e.stopPropagation()}>
+        <button data-collapser className={twMerge('symbol bg-neutral size-6 absolute right-1 bottom-1 cursor-pointer [:has(>&):not(:has(+*_[data-node]))>&]:hidden rounded-full', editingWithAngularUnit && 'hidden')} title='Collapse' onClick={() => tree.toggleNodeCollapse(node)} onDoubleClick={(e) => e.stopPropagation()}>
           {node.collapsed ? 'expand_content' : 'collapse_content'}
         </button>
       </Card>
