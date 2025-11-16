@@ -23,7 +23,7 @@ function isPrimaryDependency (dependency: TreeNode, dependent: TreeNode): boolea
       continue
     }
 
-    if (dep.lastModified > mostRecent.lastModified) mostRecent = dep
+    if (dep.createdAt > mostRecent.createdAt) mostRecent = dep
   }
 
   return dependency === mostRecent
@@ -49,6 +49,21 @@ export function DynamicMathfield ({ node, showNumeric, className, 'read-only': r
       )}
     </math-field>
   )
+}
+
+/**
+ * Sum all nodes within a subtree
+ * @param node The node
+ * @returns    The number of nodes in the subtree
+ */
+function sumSubtree (node: TreeNode): number {
+  let sum = 1
+
+  for (const dependent of node.dependents) {
+    if (isPrimaryDependency(node, dependent)) sum += sumSubtree(dependent)
+  }
+
+  return sum
 }
 
 /**
@@ -130,57 +145,78 @@ export function VisualNode ({ node, onAlias, onNote, rightEnd }: { node: TreeNod
   }, [calculator, node])
 
   return (
-    <div className='flex flex-col items-center gap-24'>
-      <Card id={`node_${node.id}`} className='relative bg-neutral text-neutral-content w-48 shrink-0 h-32 p-2' onDoubleClick={(e) => { e.preventDefault(); startEditing() }}>
-        <Card.Title className='flex gap-4 justify-between items-start'>
-          <div className='flex flex-col gap-1'>
-            <div className='flex gap-2'>
-              <dt className='font-bold'>{node.id}</dt>
-
-              <Button variant='link' size='sm' onClick={insertID} className='p-0 h-auto' onDoubleClick={(e) => e.stopPropagation()}>Use</Button>
-            </div>
-
-            {node.alias && <h3 className='text-sm italic text-neutral-content/70'>{node.alias}</h3>}
-          </div>
-
-          <Dropdown horizontal={rightEnd ? 'left' : undefined} vertical='bottom'>
-            <Dropdown.Toggle button={false} role='button' className='symbol cursor-pointer'>more_vert</Dropdown.Toggle>
-            <Dropdown.Menu className='bg-base-200 text-base-content w-max'>
-              <Dropdown.Item onClick={startEditing}>Edit</Dropdown.Item>
-              <Dropdown.Item onClick={() => onAlias(node)}>{`${node.alias ? 'Edit' : 'Add'} Alias`}</Dropdown.Item>
-              <Dropdown.Item onClick={() => onNote(node)}>{`${node.note ? 'Edit' : 'Add'} Note`}</Dropdown.Item>
-              <Dropdown.Item onClick={deleteNode}>Delete</Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </Card.Title>
-
-        <DynamicMathfield
-          onKeyDown={editing ? (e) => e.key === 'Enter' && !e.defaultPrevented && saveEdit() : undefined}
-          ref={fieldRef}
-          node={node}
-          read-only={!editing}
-          className={twMerge(editing && 'bg-base-200 text-base-content')}
-        />
-
-        {editing
+    <div data-collapsed={node.collapsed || null} className={twMerge('transition flex flex-col items-center gap-24 ring-1 ring-transparent rounded-2xl', !node.collapsed && '[&:has(>[data-node]_[data-collapser]:hover)]:ring-black')}>
+      <Card data-node id={`node_${node.id}`} className={twMerge('transition-[filter] relative bg-neutral text-neutral-content w-48 shrink-0 h-32 p-2', node.collapsed && 'brightness-75')} onDoubleClick={(e) => { e.preventDefault(); startEditing() }}>
+        {node.collapsed
           ? (
-            <div className='flex justify-end gap-2 mt-auto'>
-              <Button color='error' size='xs' onClick={() => setEditing(false)}>Discard</Button>
-              <Button color='success' size='xs' onClick={saveEdit}>Save</Button>
-            </div>
+            <Fragment key='content'>
+              <h1 className='text-xl font-bold'>
+                <span>{node.id}</span>
+                <span className='text-sm'>&nbsp;- Collapsed</span>
+              </h1>
+              {node.alias && <h3 className='text-sm italic text-neutral-content/70'>{node.alias}</h3>}
+
+              <h2 className='italic text-base mt-4'>{sumSubtree(node)} descendants</h2>
+            </Fragment>
           )
-          : node.note
-            ? <p className='text-xs text-neutral-content/60 line-clamp-1 overflow-ellipsis mt-auto' title={node.note}>{node.note}</p>
-            : null}
+          : (
+            <Fragment key='content'>
+              <Card.Title className='flex gap-4 justify-between items-start'>
+                <div className='flex flex-col gap-1'>
+                  <div className='flex gap-2'>
+                    <dt className='font-bold'>{node.id}</dt>
+
+                    <Button variant='link' size='sm' onClick={insertID} className='p-0 h-auto' onDoubleClick={(e) => e.stopPropagation()}>Use</Button>
+                  </div>
+
+                  {node.alias && <h3 className='text-sm italic text-neutral-content/70'>{node.alias}</h3>}
+                </div>
+
+                <Dropdown horizontal={rightEnd ? 'left' : undefined} vertical='bottom'>
+                  <Dropdown.Toggle button={false} role='button' className='symbol cursor-pointer'>more_vert</Dropdown.Toggle>
+                  <Dropdown.Menu className='bg-base-200 text-base-content w-max'>
+                    <Dropdown.Item onClick={startEditing}>Edit</Dropdown.Item>
+                    <Dropdown.Item onClick={() => onAlias(node)}>{`${node.alias ? 'Edit' : 'Add'} Alias`}</Dropdown.Item>
+                    <Dropdown.Item onClick={() => onNote(node)}>{`${node.note ? 'Edit' : 'Add'} Note`}</Dropdown.Item>
+                    <Dropdown.Item onClick={deleteNode}>Delete</Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Card.Title>
+
+              <DynamicMathfield
+                onKeyDown={editing ? (e) => e.key === 'Enter' && !e.defaultPrevented && saveEdit() : undefined}
+                ref={fieldRef}
+                node={node}
+                read-only={!editing}
+                className={twMerge(editing && 'bg-base-200 text-base-content')}
+              />
+
+              {editing
+                ? (
+                  <div className='flex justify-end gap-2 mt-auto'>
+                    <Button color='error' size='xs' onClick={() => setEditing(false)}>Discard</Button>
+                    <Button color='success' size='xs' onClick={saveEdit}>Save</Button>
+                  </div>
+                )
+                : node.note
+                  ? <p className='text-xs text-neutral-content/60 line-clamp-1 overflow-ellipsis mt-auto' title={node.note}>{node.note}</p>
+                  : null}
+            </Fragment>
+          )}
+
+        <button data-collapser className='symbol bg-neutral size-6 absolute right-1 bottom-1 cursor-pointer [:has(>&):not(:has(+*_[data-node]))>&]:hidden' title='Collapse' onClick={() => tree.toggleNodeCollapse(node)} onDoubleClick={(e) => e.stopPropagation()}>
+          {node.collapsed ? 'expand_content' : 'collapse_content'}
+        </button>
       </Card>
 
-      <div className='flex gap-12 empty:hidden'>
+      <div className='flex gap-12 empty:hidden [[data-collapsed]_&]:absolute [[data-collapsed]_&_[data-node]]:absolute [[data-collapsed]_&]:pointer-events-none [[data-collapsed]_&_[data-node]]:opacity-0'>
         {Array.from(node.dependents).map((n) => {
           const isPrimary = isPrimaryDependency(node, n)
 
           return (
             <Fragment key={n.id}>
-              <Xarrow divContainerStyle={{ zIndex: -1 }} start={`node_${node.id}`} end={`node_${n.id}`} path='straight' headSize={3} color={isPrimary ? 'var(--color-secondary)' : 'var(--color-accent)'} />
+              {/* TODO: hide secondaries within the collapsed tree */}
+              <Xarrow divContainerProps={{ className: isPrimary ? '[[data-collapsed]_&]:hidden' : undefined }} divContainerStyle={{ zIndex: -1 }} start={`node_${node.id}`} end={`node_${n.id}`} path='straight' headSize={3} color={isPrimary ? 'var(--color-secondary)' : 'var(--color-accent)'} />
 
               {isPrimary && <VisualNode node={n} onAlias={onAlias} onNote={onNote} />}
             </Fragment>
