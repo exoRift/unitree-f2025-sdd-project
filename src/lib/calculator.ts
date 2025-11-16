@@ -123,6 +123,21 @@ export class HistoryCalculator {
     const sanitized = HistoryCalculator.sanitize(equation)
     const parsed = this.engine.parse(sanitized)
 
+    // if (this.tree.lastCreatedNode) {
+    //   const numerical = (this.tree.lastCreatedNode.amortizedValue ?? this.refreshNode(this.tree.lastCreatedNode)).N()
+
+    //   if (numerical.isNumberLiteral) {
+    //     const replaced = parsed.map((e) => e.isNumberLiteral && e.isSame(numerical)
+    //       ? this.engine.box(this.tree.lastCreatedNode!.id)
+    //       : e)
+
+    //     if (!replaced.isSame(parsed)) {
+    //       parsed = replaced
+    //       this.tree.dispatchEvent(new CustomEvent('implicit'))
+    //     }
+    //   }
+    // }
+
     return [parsed, ...this.evaluateParsedExpression(parsed, angularUnit)]
   }
 
@@ -136,7 +151,7 @@ export class HistoryCalculator {
       const numerical = (this.tree.lastCreatedNode.amortizedValue ?? this.refreshNode(this.tree.lastCreatedNode)).N()
 
       if (numerical.isNumberLiteral) {
-        const replaced = equation.replaceAll(numerical.toLatex(), `\\$${this.tree.lastCreatedNode.id}`)
+        const replaced = equation.replaceAll(new RegExp(`(?<!\\d)${numerical.toLatex()}(?!\\d)`, 'g'), `\\$${this.tree.lastCreatedNode.id}`)
 
         if (replaced !== equation) {
           equation = replaced
