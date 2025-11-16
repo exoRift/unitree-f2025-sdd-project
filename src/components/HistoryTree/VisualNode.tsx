@@ -159,7 +159,7 @@ export function VisualNode ({ node, onAlias, onNote, rightEnd }: { node: TreeNod
               </Card.Title>
               {node.alias && <h3 className='text-sm italic text-neutral-content/70'>{node.alias}</h3>}
 
-              <h2 className='italic text-base mt-4'>{sumSubtree(node)} descendants</h2>
+              <h2 className='italic text-base mt-4'>{sumSubtree(node)} nodes</h2>
             </Fragment>
           )
           : (
