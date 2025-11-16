@@ -1,12 +1,13 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import type { MathfieldElement } from 'mathlive'
+import type { AngularUnit } from '@cortex-js/compute-engine'
 import { twMerge } from 'tailwind-merge'
 
 import type { TreeNode } from '../../lib/history'
 import { useCalculator } from '../../hooks/useCalculator'
 
 import Xarrow from 'react-xarrows'
-import { Button, Card, Dropdown } from 'react-daisyui'
+import { Button, Card, Dropdown, Select } from 'react-daisyui'
 
 /**
  * Determine if a dependency is the primary dependency of a dependent
@@ -78,7 +79,7 @@ export function VisualNode ({ node, onAlias, onNote, rightEnd }: { node: TreeNod
   const fieldRef = useRef<MathfieldElement>(null)
   const { tree, calculator } = useCalculator()
 
-  const [editing, setEditing] = useState(false)
+  const [editingWithAngularUnit, setEditingWithAngularUnit] = useState<AngularUnit>()
 
   const insertID = useCallback(() => {
     const field = document.getElementById('eqInput') as MathfieldElement
@@ -132,17 +133,17 @@ export function VisualNode ({ node, onAlias, onNote, rightEnd }: { node: TreeNod
       aborter.abort()
       cleanup()
     }
-  }, [node.id, node.dependencies.size, node.dependents.size])
+  }, [node.id, node.dependencies, node.dependents, node.dependencies.size, node.dependents.size])
 
   const startEditing = useCallback(() => {
-    setEditing(true)
+    setEditingWithAngularUnit(node.angularUnit)
     fieldRef.current?.select()
-  }, [])
+  }, [node.angularUnit])
 
   const saveEdit = useCallback(() => {
-    setEditing(false)
-    calculator.editNode(node, fieldRef.current!.value)
-  }, [calculator, node])
+    calculator.editNode(node, fieldRef.current!.value, editingWithAngularUnit)
+    setEditingWithAngularUnit(undefined)
+  }, [calculator, node, editingWithAngularUnit])
 
   return (
     <div data-collapsed={node.collapsed || null} className={twMerge('transition flex flex-col items-center gap-24 ring-1 ring-transparent rounded-2xl', !node.collapsed && '[&:has(>[data-node]_[data-collapser]:hover)]:ring-black')}>
@@ -184,17 +185,22 @@ export function VisualNode ({ node, onAlias, onNote, rightEnd }: { node: TreeNod
               </Card.Title>
 
               <DynamicMathfield
-                onKeyDown={editing ? (e) => e.key === 'Enter' && !e.defaultPrevented && saveEdit() : undefined}
+                onKeyDown={editingWithAngularUnit ? (e) => e.key === 'Enter' && !e.defaultPrevented && saveEdit() : undefined}
                 ref={fieldRef}
                 node={node}
-                read-only={!editing}
-                className={twMerge(editing && 'bg-base-200 text-base-content')}
+                read-only={!editingWithAngularUnit}
+                className={twMerge(editingWithAngularUnit && 'bg-base-200 text-base-content')}
               />
 
-              {editing
+              {editingWithAngularUnit
                 ? (
                   <div className='flex justify-end gap-2 mt-auto'>
-                    <Button color='error' size='xs' onClick={() => setEditing(false)}>Discard</Button>
+                    <Select size='xs' className='w-min block text-base-content' title='Angular Unit' defaultValue={node.angularUnit} onChange={(v) => setEditingWithAngularUnit(v.currentTarget.value as 'deg' | 'rad')}>
+                      <Select.Option value='rad'>&pi;</Select.Option>
+                      <Select.Option value='deg'>&deg;</Select.Option>
+                    </Select>
+
+                    <Button color='error' size='xs' onClick={() => setEditingWithAngularUnit(undefined)}>Discard</Button>
                     <Button color='success' size='xs' onClick={saveEdit}>Save</Button>
                   </div>
                 )

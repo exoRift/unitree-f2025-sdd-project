@@ -1,9 +1,8 @@
-import type { SerializedTree } from './history'
-import type { SessionManager } from './session'
+import type { Session, SessionManager } from './session'
 
 export interface Workspace {
   name: string
-  data: SerializedTree
+  data: Session
   createdAt: Date
 }
 

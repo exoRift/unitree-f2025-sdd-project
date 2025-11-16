@@ -1,6 +1,10 @@
 import { HistoryCalculator } from './calculator'
 import { type SerializedTree, Tree } from './history'
 
+export interface Session {
+  tree: SerializedTree
+}
+
 /**
  * Manages the state of the application
  */
@@ -46,8 +50,10 @@ export class SessionManager extends EventTarget {
    * Serialize the current state
    * @returns The state in serialized object form
    */
-  serialize (): SerializedTree {
-    return this.tree.serialize()
+  serialize (): Session {
+    return {
+      tree: this.tree.serialize()
+    }
   }
 
   /**
@@ -65,7 +71,7 @@ export class SessionManager extends EventTarget {
 
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as SerializedTree
+        const parsed = JSON.parse(stored) as Session
         this.loadSession(parsed)
       } catch (err) {
         console.error('Stored session corrupted', err, stored)
@@ -85,8 +91,8 @@ export class SessionManager extends EventTarget {
    * Load a session from its serialized data
    * @param data The serialized data
    */
-  loadSession (data: SerializedTree): void {
-    this.tree.loadSerialized(data)
+  loadSession (data: Session): void {
+    this.tree.loadSerialized(data.tree, this.calculator.engine)
     for (const root of this.tree.roots) this.calculator.refreshNode(root)
   }
 
