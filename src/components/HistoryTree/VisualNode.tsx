@@ -23,7 +23,7 @@ function isPrimaryDependency (dependency: TreeNode, dependent: TreeNode): boolea
       continue
     }
 
-    if (dep.lastModified > mostRecent.lastModified) mostRecent = dep
+    if (dep.createdAt > mostRecent.createdAt) mostRecent = dep
   }
 
   return dependency === mostRecent

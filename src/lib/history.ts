@@ -11,8 +11,8 @@ export interface SerializedNode {
   rawUserEquation: string
   parsed: Expression
   note?: string
-  lastModified: Date
   collapsed: boolean
+  createdAt: Date
 }
 
 export interface SerializedTree {
@@ -95,7 +95,7 @@ export class Tree extends EventTarget {
       this.idLookup.set(node.id, node)
       if (serializedNode.alias) this.setAlias(node, serializedNode.alias)
       if (serializedNode.note) this.setNote(node, serializedNode.note)
-      node.lastModified = new Date(serializedNode.lastModified)
+      node.createdAt = new Date(serializedNode.createdAt)
     }
 
     for (const serializedNode of serializedTree.nodes) {
@@ -157,10 +157,8 @@ export class Tree extends EventTarget {
 
     let node: TreeNode
     if (dependencies.length) {
-      // If this is a descendant of more than one node, use a new letter
-      const letterConstraint = dependencies.length > 1
-        ? undefined
-        : dependencies[0]!.id.match(/^[a-z]+/)![0]
+      const primary = dependencies.reduce((a, d) => d.createdAt > a.createdAt ? d : a)
+      const letterConstraint = primary.id.match(/^[a-z]+/)![0]
 
       const id = this.generateID(letterConstraint)
       node = new TreeNode(id, rawUserEquation, parsedEquation)
@@ -314,8 +312,8 @@ class TreeNode {
   /** An externally controllled amortized value */
   amortizedValue?: BoxedExpression
   note?: string
-  lastModified: Date
   collapsed: boolean
+  createdAt: Date
 
   /**
    * Construct a node
@@ -327,8 +325,8 @@ class TreeNode {
     this.id = id
     this.rawUserEquation = rawUserEquation
     this.parsedEquation = parsedEquation
-    this.lastModified = new Date()
     this.collapsed = false
+    this.createdAt = new Date()
   }
 
   /**
@@ -343,8 +341,8 @@ class TreeNode {
       rawUserEquation: this.rawUserEquation,
       parsed: this.parsedEquation.toJSON(),
       note: this.note,
-      lastModified: this.lastModified,
-      collapsed: this.collapsed
+      collapsed: this.collapsed,
+      createdAt: this.createdAt
     }
   }
 }
