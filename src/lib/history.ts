@@ -240,8 +240,10 @@ export class Tree extends EventTarget {
     if (alias === '' || node.alias === alias) return
     if (!this.nodes.has(node)) throw new Error('Node not present in tree')
     if (alias && this.aliasLookup.has(alias)) throw new Error('Alias already taken')
+
+    if (node.alias) this.aliasLookup.delete(node.alias)
+
     if (alias) this.aliasLookup.set(alias, node)
-    else if (node.alias) this.aliasLookup.delete(node.alias)
     node.alias = alias
     this.dispatchMutate()
   }
