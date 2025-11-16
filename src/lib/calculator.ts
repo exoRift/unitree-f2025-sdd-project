@@ -157,16 +157,18 @@ export class HistoryCalculator {
 
   /**
    * Edit the equation of a node and refresh it and its dependencies
-   * @param node     The node
-   * @param equation The new equation
-   * @returns        [parsed equation, value, dependencies]
+   * @param node           The node
+   * @param equation       The new equation
+   * @param newAngularUnit The new angular unit to use for the node
+   * @returns              [parsed equation, value, dependencies]
    */
-  editNode (node: TreeNode, equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
+  editNode (node: TreeNode, equation: string, newAngularUnit?: AngularUnit): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
     const sanitized = HistoryCalculator.sanitize(equation)
     const parsed = this.engine.parse(sanitized)
 
     node.rawUserEquation = equation
     node.parsedEquation = parsed
+    if (newAngularUnit) node.angularUnit = newAngularUnit
     node.lastModified = new Date()
     const value = this.refreshNode(node)
     this.tree.dispatchEvent(new CustomEvent('mutate'))
