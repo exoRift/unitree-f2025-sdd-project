@@ -184,9 +184,9 @@ export class HistoryCalculator {
     node.rawUserEquation = equation
     node.parsedEquation = parsed
     if (newAngularUnit) node.angularUnit = newAngularUnit
-    node.lastModified = new Date()
     const value = this.refreshNode(node)
-    this.tree.dispatchEvent(new CustomEvent('mutate'))
+
+    this.tree.dispatchMutate()
     return [parsed, value, node.dependencies]
   }
 }

@@ -3,10 +3,10 @@ import { createRoot } from 'react-dom/client'
 
 import 'mathlive'
 
-import Session from './App.tsx'
+import Entrypoint from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Session />
+    <Entrypoint />
   </StrictMode>
 )

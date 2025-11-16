@@ -76,7 +76,7 @@ export function HistoryTree (): React.ReactNode {
 
   return (
     <div className='relative h-full flex flex-col'>
-      <div className='relative h-0 grow overflow-auto flex gap-12 p-8'>
+      <div className='relative h-0 grow overflow-scroll flex gap-12 p-8'>
         {Array.from(tree.roots).map((node, i) => (
           <VisualNode
             key={node.id}

@@ -4,7 +4,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 const SettingsSchema = type({
   orientation: type('"horizontal" | "vertical"').default(typeof window !== 'undefined' && window.innerWidth < 500 ? 'vertical' : 'horizontal'),
   autoSnapToNew: type.boolean.default(true),
-  theme: type('"light" | "dark" | "system"').default('system')
+  theme: type('"light" | "dark" | "system"').default('system'),
+  saveSession: type.boolean.default(true)
 })
 
 export type SettingsSchema = typeof SettingsSchema.infer
