@@ -85,16 +85,27 @@ export function Calculator (): React.ReactNode {
 
   const negate = useCallback(() => {
     const input = document.getElementById('eqInput') as MathfieldElement
-    let value = input.value
-    let position = input.selection.ranges[0]?.[0] ?? 1
-    do {
-      --position
-    } while (position >= 0 && value[position]!.match(/[0-9.]/))
+    let value = input.getValue('plain-text')
+    const originalPosition = input.selection.ranges[0]?.[0] ?? 0
+    let shift = 0
+    let position = originalPosition
 
-    if (value[Math.max(0, position)] === '-') value = value.slice(0, position) + value.slice(position + 1, value.length)
-    else value = value.slice(0, position + 1) + '-' + value.slice(position + 1, value.length)
+    do --position
+    while (position >= 0 && value[position]?.match(/[0-9.]/))
+
+    if (position >= 0 && value[position] === '-') {
+      shift = -1
+      value = value.slice(0, position) + value.slice(position + 1, value.length)
+    } else {
+      shift = 1
+      value = value.slice(0, Math.max(0, position + 1)) + '-' + value.slice(Math.max(0, position + 1), value.length)
+    }
 
     input.setValue(value)
+    input.selection = {
+      ranges: [[originalPosition + shift, originalPosition + shift]],
+      direction: 'forward'
+    }
     input.focus()
   }, [])
 
