@@ -112,7 +112,7 @@ export function WorkspaceManager (): React.ReactNode {
               <h3 className='text-base-content/60 text-xl text-center'>No saved workspaces found.</h3>
             )}
 
-          <SaveButton onSave={(name) => { workspaces.saveWorkspace(name); setSignal((prior) => prior + 1) }} />
+          <SaveButton onSave={(name) => { workspaces.saveWorkspace(name, true); setSignal((prior) => prior + 1) }} />
         </Modal.Body>
 
         <Modal.Actions>
