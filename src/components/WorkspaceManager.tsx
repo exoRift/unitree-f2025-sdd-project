@@ -87,7 +87,7 @@ export function WorkspaceManager (): React.ReactNode {
                     {Array.from(workspaces.workspaces.values()).reverse().map((w) => (
                       <Table.Row key={w.name}>
                         <span>{w.name}</span>
-                        <span>{`${w.data.nodes.length} node${w.data.nodes.length === 1 ? '' : 's'}`}</span>
+                        <span>{`${w.data.tree.nodes.length} node${w.data.tree.nodes.length === 1 ? '' : 's'}`}</span>
                         <span>{Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(w.createdAt)}</span>
                         <div className='flex gap-2 justify-end'>
                           {/* TODO: on error, display */}

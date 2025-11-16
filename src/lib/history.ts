@@ -2,7 +2,7 @@
  * For first implementation, equation type will be "unknown" until calculator backend is created
  */
 
-import { ComputeEngine, type BoxedExpression, type Expression } from '@cortex-js/compute-engine'
+import type { ComputeEngine, AngularUnit, BoxedExpression, Expression } from '@cortex-js/compute-engine'
 
 export interface SerializedNode {
   id: string
@@ -10,6 +10,7 @@ export interface SerializedNode {
   dependencies: string[]
   rawUserEquation: string
   parsed: Expression
+  angularUnit: AngularUnit
   note?: string
   lastModified: Date
 }
@@ -77,17 +78,17 @@ export class Tree extends EventTarget {
 
   /**
    * Populate data from a serialized tree into this instance
+   * @param serialized The serialized data
+   * @param engine     The Cortex compute engine instance to use
    */
-  private populateData (serialized: SerializedTree): void {
-    const engine = new ComputeEngine()
-
+  private populateData (serialized: SerializedTree, engine: ComputeEngine): void {
     this.idLetterIterator = serialized.idLetterIterator
     for (const letter in serialized.idNumberIterators) {
       this.idNumberIterators.set(letter, serialized.idNumberIterators[letter]!)
     }
 
     for (const serializedNode of serialized.nodes) {
-      const node = new TreeNode(serializedNode.id, serializedNode.rawUserEquation, engine.box(serializedNode.parsed))
+      const node = new TreeNode(serializedNode.id, serializedNode.rawUserEquation, engine.box(serializedNode.parsed), serializedNode.angularUnit)
 
       this.nodes.add(node)
       this.idLookup.set(node.id, node)
@@ -111,25 +112,18 @@ export class Tree extends EventTarget {
   }
 
   /**
-   * Construct a tree from a serialized representation
-   */
-  constructor (serialized?: SerializedTree) {
-    super()
-
-    if (serialized) this.populateData(serialized)
-  }
-
-  /**
    * Load a serialized tree into this current tree
+   * @param serialized The serialized data
+   * @param engine     The Cortex compute engine instance to use
    */
-  loadSerialized (serialized: SerializedTree): void {
+  loadSerialized (serialized: SerializedTree, engine: ComputeEngine): void {
     this.nodes.clear()
     this.roots.clear()
     this.aliasLookup.clear()
     this.idLookup.clear()
     this.idNumberIterators.clear()
     this.lastCreatedNode = undefined
-    this.populateData(serialized)
+    this.populateData(serialized, engine)
     this.dispatchEvent(new CustomEvent('mutate'))
   }
 
@@ -137,11 +131,12 @@ export class Tree extends EventTarget {
    * Create a new node (root, if no dependencies specified)
    * @param                 rawUserEquation The raw user input in string form
    * @param                 parsedEquation  The equation inputted by the user
+   * @param                 angularUnit     The unit to use for angle-based functions
    * @param   {...TreeNode} dependencies    The other nodes this node depends on, if any
    * @throws  {Error}                       if a dependency is given that is not present in the tree
    * @returns                               The created node
    */
-  addNewNode (rawUserEquation: string, parsedEquation: BoxedExpression, ...dependencies: TreeNode[]): TreeNode {
+  addNewNode (rawUserEquation: string, parsedEquation: BoxedExpression, angularUnit: AngularUnit, ...dependencies: TreeNode[]): TreeNode {
     for (const dependency of dependencies) {
       if (!this.nodes.has(dependency)) throw new Error(`Dependency with ID "${dependency.id}" not present in tree`)
     }
@@ -154,12 +149,12 @@ export class Tree extends EventTarget {
         : dependencies[0]!.id.match(/^[a-z]+/)![0]
 
       const id = this.generateID(letterConstraint)
-      node = new TreeNode(id, rawUserEquation, parsedEquation)
+      node = new TreeNode(id, rawUserEquation, parsedEquation, angularUnit)
       this.nodes.add(node)
       dependencies.forEach((d) => this.addDependency(node, d))
     } else {
       const id = this.generateID()
-      node = new TreeNode(id, rawUserEquation, parsedEquation)
+      node = new TreeNode(id, rawUserEquation, parsedEquation, angularUnit)
       this.nodes.add(node)
       this.roots.add(node)
     }
@@ -293,6 +288,7 @@ class TreeNode {
   dependents = new Set<TreeNode>()
   rawUserEquation: string
   parsedEquation: BoxedExpression
+  angularUnit: AngularUnit
   /** An externally controllled amortized value */
   amortizedValue?: BoxedExpression
   note?: string
@@ -303,11 +299,13 @@ class TreeNode {
    * @param id              The ID of the node
    * @param rawUserEquation The raw user input in string form
    * @param parsedEquation  The node's equation contents
+   * @param angularUnit     The unit to use for angle-based functions
    */
-  constructor (id: string, rawUserEquation: string, parsedEquation: BoxedExpression) {
+  constructor (id: string, rawUserEquation: string, parsedEquation: BoxedExpression, angularUnit: AngularUnit) {
     this.id = id
     this.rawUserEquation = rawUserEquation
     this.parsedEquation = parsedEquation
+    this.angularUnit = angularUnit
     this.lastModified = new Date()
   }
 
@@ -322,6 +320,7 @@ class TreeNode {
       dependencies: Array.from(this.dependencies).map((d) => d.id),
       rawUserEquation: this.rawUserEquation,
       parsed: this.parsedEquation.toJSON(),
+      angularUnit: this.angularUnit,
       note: this.note,
       lastModified: this.lastModified
     }

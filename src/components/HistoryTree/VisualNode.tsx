@@ -117,7 +117,7 @@ export function VisualNode ({ node, onAlias, onNote, rightEnd }: { node: TreeNod
       aborter.abort()
       cleanup()
     }
-  }, [node.id, node.dependencies.size, node.dependents.size])
+  }, [node.id, node.dependencies, node.dependents, node.dependencies.size, node.dependents.size])
 
   const startEditing = useCallback(() => {
     setEditing(true)

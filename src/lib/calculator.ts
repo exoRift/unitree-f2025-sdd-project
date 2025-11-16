@@ -1,14 +1,15 @@
 import type { TreeNode, Tree } from './history'
 
-import { ComputeEngine, type BoxedExpression } from '@cortex-js/compute-engine'
+import { type AngularUnit, type BoxedExpression, ComputeEngine } from '@cortex-js/compute-engine'
 
 /**
  * The history calculator evaluation context class
  */
 export class HistoryCalculator {
-  private readonly engine = new ComputeEngine()
+  readonly engine = new ComputeEngine()
 
   tree: Tree
+  defaultAngularUnit: AngularUnit
 
   /**
    * Sanitize an incoming equation
@@ -24,14 +25,16 @@ export class HistoryCalculator {
    */
   constructor (tree: Tree) {
     this.tree = tree
+    this.defaultAngularUnit = this.engine.angularUnit
   }
 
   /**
    * Evaluate an expression an return its value and dependencies
-   * @param parsed The parsed expression
-   * @returns      [value, dependencies]
+   * @param parsed      The parsed expression
+   * @param angularUnit The unit to use for angle-based functions
+   * @returns           [value, dependencies]
    */
-  private evaluateParsedExpression (parsed: BoxedExpression): [value: BoxedExpression, dependencies: Set<TreeNode>] {
+  private evaluateParsedExpression (parsed: BoxedExpression, angularUnit: AngularUnit): [value: BoxedExpression, dependencies: Set<TreeNode>] {
     const dependencies = new Set<TreeNode>()
 
     const unknownSymbols: string[] = []
@@ -63,6 +66,7 @@ export class HistoryCalculator {
     }
 
     // TODO: Prevent assignment
+    this.engine.angularUnit = angularUnit
     const subbed = parsed.subs(context)
     let result = subbed.evaluate()
     if (result.isSame(this.engine.parse('\\bot')) && unknownSymbols.length) {
@@ -92,7 +96,7 @@ export class HistoryCalculator {
    * @returns       The evaluation result
    */
   refreshNode (node: TreeNode): BoxedExpression {
-    const [value, dependencies] = this.evaluateParsedExpression(node.parsedEquation)
+    const [value, dependencies] = this.evaluateParsedExpression(node.parsedEquation, node.angularUnit)
     node.amortizedValue = value
 
     const missingDeps = node.dependencies.difference(dependencies)
@@ -111,14 +115,15 @@ export class HistoryCalculator {
 
   /**
    * Evaluate an expression, returning its parsed expression, value, and dependencies
-   * @param equation The equation to evaluate
-   * @returns        [parsed equation, value, dependencies]
+   * @param equation    The equation to evaluate
+   * @param angularUnit The unit to use for angle-based functions
+   * @returns           [parsed equation, value, dependencies]
    */
-  evaluateExpression (equation: string): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
+  evaluateExpression (equation: string, angularUnit = this.defaultAngularUnit): [parsed: BoxedExpression, value: BoxedExpression, dependencies: Set<TreeNode>] {
     const sanitized = HistoryCalculator.sanitize(equation)
     const parsed = this.engine.parse(sanitized)
 
-    return [parsed, ...this.evaluateParsedExpression(parsed)]
+    return [parsed, ...this.evaluateParsedExpression(parsed, angularUnit)]
   }
 
   /**
@@ -143,7 +148,7 @@ export class HistoryCalculator {
     const [parsed, value, dependencies] = this.evaluateExpression(equation)
 
     if (!value.errors.length) {
-      const node = this.tree.addNewNode(equation, parsed, ...dependencies)
+      const node = this.tree.addNewNode(equation, parsed, this.defaultAngularUnit, ...dependencies)
       node.amortizedValue = value
     }
 

@@ -5,7 +5,7 @@ import { useCalculator } from '../hooks/useCalculator'
 
 import type { MathfieldElement } from 'mathlive'
 import { DynamicMathfield } from './HistoryTree/VisualNode'
-import { Button, Modal } from 'react-daisyui'
+import { Button, Modal, Select } from 'react-daisyui'
 import { twMerge } from 'tailwind-merge'
 
 /**
@@ -98,16 +98,18 @@ export function Calculator (): React.ReactNode {
     input.focus()
   }, [])
 
-  const updatePreview = useCallback((e: FormEvent<MathfieldElement>) => {
+  const updatePreview = useCallback((e?: FormEvent<MathfieldElement>) => {
     const preview = document.getElementById('eqPreview') as MathfieldElement
-    if (!e.currentTarget.value) {
+    const value = e?.currentTarget.value ?? (document.getElementById('eqInput') as MathfieldElement).value
+
+    if (!value) {
       preview.setValue('')
       return
     }
 
-    const [, outcome] = calculator.evaluateExpression(e.currentTarget.value)
+    const [, outcome] = calculator.evaluateExpression(value)
 
-    preview.setValue(e.currentTarget.value ? outcome.N().toLatex() : '')
+    preview.setValue(value ? outcome.N().toLatex() : '')
   }, [calculator])
 
   return (
@@ -124,10 +126,17 @@ export function Calculator (): React.ReactNode {
           </div>
 
           <div className='flex gap-4 justify-between'>
-            <Button type='submit' color='primary' className='pl-3'>
-              <div className='symbol'>subdirectory_arrow_left</div>
-              <span>Evaluate & Save</span>
-            </Button>
+            <div className='flex gap-2'>
+              <Button type='submit' color='primary' className='pl-3'>
+                <div className='symbol'>subdirectory_arrow_left</div>
+                <span>Evaluate & Save</span>
+              </Button>
+
+              <Select className='w-min block' title='Angular Unit' defaultValue={calculator.defaultAngularUnit} onChange={(v) => { calculator.defaultAngularUnit = v.currentTarget.value as 'deg' | 'rad'; updatePreview() }}>
+                <Select.Option value='rad'>Angle: &pi;</Select.Option>
+                <Select.Option value='deg'>Angle: &deg;</Select.Option>
+              </Select>
+            </div>
 
             {errors
               ? (
@@ -139,8 +148,8 @@ export function Calculator (): React.ReactNode {
               )
               : tree.lastCreatedNode
                 ? (
-                  <p className='opacity-60 inline-flex items-start' key='result'>
-                    <math-field read-only>{'\\text{Last equation: }'}</math-field>
+                  <p className='opacity-60 inline-flex items-start flex-wrap' key='result'>
+                    <math-field read-only>{'\\text{Last equation:}'}</math-field>
                     <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} showNumeric />
                   </p>
                 )

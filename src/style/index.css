@@ -17,5 +17,5 @@ math-field.pointer-events-none::part(content) {
 }
 
 math-field {
-  --contains-highlight-background-color: lightgray;
+  --contains-highlight-background-color: aliceblue;
 }
