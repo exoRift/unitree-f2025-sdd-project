@@ -21,6 +21,8 @@ export class SessionManager extends EventTarget {
     this.tree = new Tree()
     this.calculator = new HistoryCalculator(this.tree)
     this.saveIntervalMs = saveDelayMs
+
+    this.scheduleSave = this.scheduleSave.bind(this)
   }
 
   /**
@@ -73,6 +75,13 @@ export class SessionManager extends EventTarget {
   }
 
   /**
+   * Purge the saved session from storage
+   */
+  purge (): void {
+    localStorage.removeItem('workspaces:session')
+  }
+
+  /**
    * Load a session from its serialized data
    * @param data The serialized data
    */
@@ -85,14 +94,16 @@ export class SessionManager extends EventTarget {
    * Start listening on mutations to auto save
    */
   startAutosaving (): void {
-    this.tree.addEventListener('mutate', this.scheduleSave.bind(this), { passive: true })
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Bound in constructor
+    this.tree.addEventListener('mutate', this.scheduleSave, { passive: true })
   }
 
   /**
    * Stop listening on mutations
    */
   stopAutosaving (): void {
-    this.tree.removeEventListener('mutate', this.scheduleSave.bind(this))
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Bound in constructor
+    this.tree.removeEventListener('mutate', this.scheduleSave)
   }
 
   /**

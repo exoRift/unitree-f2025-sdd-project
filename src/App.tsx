@@ -77,9 +77,11 @@ function App (): React.ReactNode {
 }
 
 /**
- * The main app
+ * The session provider
  */
-export default function Session (): React.ReactNode {
+function Session (): React.ReactNode {
+  const { settings } = useSettings()
+
   const ctx = useRef((() => {
     const session = new SessionManager()
     session.recall()
@@ -91,17 +93,28 @@ export default function Session (): React.ReactNode {
   })())
 
   useEffect(() => {
+    if (!settings.saveSession) return
+
     const ctxVal = ctx.current
     ctxVal.session.startAutosaving()
 
     return () => ctxVal.session.stopAutosaving()
-  }, [])
+  }, [settings.saveSession])
 
   return (
     <SessionContext.Provider value={ctx.current}>
-      <SettingsProvider>
-        <App />
-      </SettingsProvider>
+      <App />
     </SessionContext.Provider>
+  )
+}
+
+/**
+ * The main app entrypoint
+ */
+export default function Entrypoint (): React.ReactNode {
+  return (
+    <SettingsProvider>
+      <Session />
+    </SettingsProvider>
   )
 }

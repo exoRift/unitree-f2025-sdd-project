@@ -1,9 +1,10 @@
 /**
  * The top toolbar component. User customization, workspacing, and other settings are managed here
  */
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { useSettings, type SettingsSchema } from '../hooks/useSettings'
+import { useCalculator } from '../hooks/useCalculator'
 
 import { Button, Modal, Navbar, Select, Toggle } from 'react-daisyui'
 import { WorkspaceManager } from './WorkspaceManager'
@@ -14,8 +15,16 @@ import logo from '../images/unitree_logo_noWords.png'
  * A button that opens up the settings menu
  */
 function SettingsButton (): React.ReactNode {
+  const { session } = useCalculator()
   const { settings, setters } = useSettings()
   const [open, setOpen] = useState(false)
+
+  const setSaveSession = useCallback((v: boolean) => {
+    if (v) session.save()
+    else session.purge()
+
+    setters.saveSession(v)
+  }, [session, setters])
 
   return (
     <div>
@@ -44,6 +53,12 @@ function SettingsButton (): React.ReactNode {
               <label htmlFor='snap' className='font-bold text-lg'>Auto Snap to New Nodes</label>
 
               <Toggle className='grid' color='primary' id='snap' checked={settings.autoSnapToNew} onChange={() => setters.autoSnapToNew(!settings.autoSnapToNew)} />
+            </div>
+
+            <div className='space-y-1'>
+              <label htmlFor='snap' className='font-bold text-lg'>Save Data Between Sessions</label>
+
+              <Toggle className='grid' color='primary' id='snap' checked={settings.saveSession} onChange={() => setSaveSession(!settings.saveSession)} />
             </div>
 
             <div className='space-y-1'>
