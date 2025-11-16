@@ -11,6 +11,7 @@ export interface SerializedNode {
   rawUserEquation: string
   parsed: Expression
   note?: string
+  collapsed: boolean
   createdAt: Date
 }
 
@@ -78,16 +79,17 @@ export class Tree extends EventTarget {
   /**
    * Populate data from a serialized tree into this instance
    */
-  private populateData (serialized: SerializedTree): void {
+  private populateData (serializedTree: SerializedTree): void {
     const engine = new ComputeEngine()
 
-    this.idLetterIterator = serialized.idLetterIterator
-    for (const letter in serialized.idNumberIterators) {
-      this.idNumberIterators.set(letter, serialized.idNumberIterators[letter]!)
+    this.idLetterIterator = serializedTree.idLetterIterator
+    for (const letter in serializedTree.idNumberIterators) {
+      this.idNumberIterators.set(letter, serializedTree.idNumberIterators[letter]!)
     }
 
-    for (const serializedNode of serialized.nodes) {
+    for (const serializedNode of serializedTree.nodes) {
       const node = new TreeNode(serializedNode.id, serializedNode.rawUserEquation, engine.box(serializedNode.parsed))
+      node.collapsed = serializedNode.collapsed
 
       this.nodes.add(node)
       this.idLookup.set(node.id, node)
@@ -96,7 +98,7 @@ export class Tree extends EventTarget {
       node.createdAt = new Date(serializedNode.createdAt)
     }
 
-    for (const serializedNode of serialized.nodes) {
+    for (const serializedNode of serializedTree.nodes) {
       if (!serializedNode.dependencies.length) continue
 
       const node = this.idLookup.get(serializedNode.id)!
@@ -105,9 +107,16 @@ export class Tree extends EventTarget {
       }
     }
 
-    for (const root of serialized.roots) {
+    for (const root of serializedTree.roots) {
       this.roots.add(this.idLookup.get(root)!)
     }
+  }
+
+  /**
+   * Dispatch a mutate event
+   */
+  private dispatchMutate (): void {
+    this.dispatchEvent(new CustomEvent('mutate'))
   }
 
   /**
@@ -130,7 +139,7 @@ export class Tree extends EventTarget {
     this.idNumberIterators.clear()
     this.lastCreatedNode = undefined
     this.populateData(serialized)
-    this.dispatchEvent(new CustomEvent('mutate'))
+    this.dispatchMutate()
   }
 
   /**
@@ -164,7 +173,7 @@ export class Tree extends EventTarget {
 
     this.idLookup.set(node.id, node)
     this.lastCreatedNode = node
-    this.dispatchEvent(new CustomEvent('mutate'))
+    this.dispatchMutate()
     return node
   }
 
@@ -182,7 +191,7 @@ export class Tree extends EventTarget {
 
     dependent.dependencies.add(dependency)
     dependency.dependents.add(dependent)
-    this.dispatchEvent(new CustomEvent('mutate'))
+    this.dispatchMutate()
   }
 
   /**
@@ -198,7 +207,7 @@ export class Tree extends EventTarget {
 
     dependent.dependencies.delete(dependency)
     dependency.dependents.delete(dependent)
-    this.dispatchEvent(new CustomEvent('mutate'))
+    this.dispatchMutate()
   }
 
   /**
@@ -217,7 +226,7 @@ export class Tree extends EventTarget {
     this.roots.delete(node)
     if (node.alias) this.aliasLookup.delete(node.alias)
     if (node === this.lastCreatedNode) this.lastCreatedNode = undefined
-    this.dispatchEvent(new CustomEvent('mutate'))
+    this.dispatchMutate()
     return true
   }
 
@@ -234,7 +243,7 @@ export class Tree extends EventTarget {
     if (alias) this.aliasLookup.set(alias, node)
     else if (node.alias) this.aliasLookup.delete(node.alias)
     node.alias = alias
-    this.dispatchEvent(new CustomEvent('mutate'))
+    this.dispatchMutate()
   }
 
   /**
@@ -247,7 +256,7 @@ export class Tree extends EventTarget {
     if (note === '') return
     if (!this.nodes.has(node)) throw new Error('Node not present in tree')
     node.note = note
-    this.dispatchEvent(new CustomEvent('mutate'))
+    this.dispatchMutate()
   }
 
   /**
@@ -267,6 +276,15 @@ export class Tree extends EventTarget {
   }
 
   /**
+   * Toggle whether a node is collapsed or not
+   * @param node The node
+   */
+  toggleNodeCollapse (node: TreeNode): void {
+    node.collapsed = !node.collapsed
+    this.dispatchMutate()
+  }
+
+  /**
    * Clears the tree and resets to initial state
    */
   clear (): void {
@@ -276,7 +294,7 @@ export class Tree extends EventTarget {
     this.aliasLookup.clear()
     this.idLetterIterator = 0
     this.idNumberIterators.clear()
-    this.dispatchEvent(new CustomEvent('mutate'))
+    this.dispatchMutate()
   }
 }
 
@@ -294,6 +312,7 @@ class TreeNode {
   /** An externally controllled amortized value */
   amortizedValue?: BoxedExpression
   note?: string
+  collapsed: boolean
   createdAt: Date
 
   /**
@@ -306,6 +325,7 @@ class TreeNode {
     this.id = id
     this.rawUserEquation = rawUserEquation
     this.parsedEquation = parsedEquation
+    this.collapsed = false
     this.createdAt = new Date()
   }
 
@@ -321,6 +341,7 @@ class TreeNode {
       rawUserEquation: this.rawUserEquation,
       parsed: this.parsedEquation.toJSON(),
       note: this.note,
+      collapsed: this.collapsed,
       createdAt: this.createdAt
     }
   }
