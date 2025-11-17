@@ -159,7 +159,7 @@ export function Calculator (): React.ReactNode {
               )
               : tree.lastCreatedNode
                 ? (
-                  <p className='opacity-60 inline-flex items-start flex-wrap' key='result'>
+                  <p className='opacity-60 inline-flex items-start flex-wrap ml-auto' key='result'>
                     <math-field read-only>{'\\text{Last equation:}'}</math-field>
                     <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} showNumeric />
                   </p>
