@@ -37,6 +37,10 @@ export class HistoryCalculator {
   private evaluateParsedExpression (parsed: BoxedExpression, angularUnit: AngularUnit): [value: BoxedExpression, dependencies: Set<TreeNode>] {
     const dependencies = new Set<TreeNode>()
 
+    if (parsed.isValid && !parsed.isPure) {
+      return [this.engine.error('Assignments are not permitted (":=" operator)'), dependencies]
+    }
+
     const unknownSymbols: string[] = []
     const symbols = parsed.symbols
     for (const symbol of symbols) {
@@ -65,7 +69,6 @@ export class HistoryCalculator {
       if (dependency.alias) context[dependency.alias] = value
     }
 
-    // TODO: Prevent assignment
     this.engine.angularUnit = angularUnit
     const subbed = parsed.subs(context)
     let result = subbed.evaluate()
