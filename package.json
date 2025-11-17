@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build-deps": "mv node_modules/@cortex-js/compute-engine ce && cd ce && bun i && bun run build && cd .. && mv ce node_modules/@cortex-js/compute-engine",
     "dev": "PORT=3000 vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
