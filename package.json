@@ -6,7 +6,7 @@
   "scripts": {
     "build-deps": "mv node_modules/@cortex-js/compute-engine ce && cd ce && bun i && bun run build && cd .. && mv ce node_modules/@cortex-js/compute-engine",
     "dev": "PORT=3000 vite",
-    "build": "bun run build-deps && tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "validate": "tsc -b",
     "preview": "PORT=3000 vite preview",
