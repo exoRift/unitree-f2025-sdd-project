@@ -136,7 +136,7 @@ export function Calculator (): React.ReactNode {
             <math-field id='eqPreview' read-only className='w-1/3 grow opacity-50 border text-xl' />
           </div>
 
-          <div className='flex gap-4 justify-between'>
+          <div className='flex gap-4 justify-between flex-wrap'>
             <div className='flex gap-2'>
               <Button type='submit' color='primary' className='pl-3'>
                 <div className='symbol'>subdirectory_arrow_left</div>
@@ -151,7 +151,7 @@ export function Calculator (): React.ReactNode {
 
             {errors
               ? (
-                <p className='text-error' key='result'>
+                <p className='text-error ml-auto' key='result'>
                   {errors.map((e, i) => (
                     <span key={i} className='not-last:after:content-["_|_"] after:text-base-content/50 after:font-bold'>{e.toString()}</span>
                   ))}
@@ -159,7 +159,7 @@ export function Calculator (): React.ReactNode {
               )
               : tree.lastCreatedNode
                 ? (
-                  <p className='opacity-60 inline-flex items-start flex-wrap' key='result'>
+                  <p className='opacity-60 inline-flex items-start flex-wrap ml-auto' key='result'>
                     <math-field read-only>{'\\text{Last equation:}'}</math-field>
                     <DynamicMathfield className='text-base-content' node={tree.lastCreatedNode} showNumeric />
                   </p>
