@@ -82,80 +82,6 @@ function SettingsButton (): React.ReactNode {
 }
 
 /**
- * A button that opens up the guide menu
- */
-function GuideButton (): React.ReactNode {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <button
-        type='button'
-        onClick={() => setOpen(true)}
-        aria-label='Open guide'
-        title='Guide'
-        className='group inline-flex justify-center items-center cursor-pointer overflow-clip size-12 rounded-full hover:bg-base-200 transition'
-      >
-        <div className='symbol text-3xl transition-transform duration-300 group-hover:scale-125'>
-          book_2
-        </div>
-      </button>
-
-      <Modal.Legacy open={open} onClickBackdrop={() => setOpen(false)}>
-        <Modal.Header>
-          <h1 className='font-bold text-lg'>How to use the Unitree Calculator</h1>
-        </Modal.Header>
-
-        <Modal.Body className='space-y-3 max-h-[70vh] overflow-y-auto'>
-          <p>
-            This calculator builds a <strong>history tree</strong> of your computations.
-            Every time you press <strong>Evaluate</strong>, you create a new <strong>node</strong>.
-          </p>
-
-          <div>
-            <h2 className='font-semibold text-sm'>1. Creating nodes</h2>
-            <ul className='list-disc list-inside pl-4 text-sm space-y-1'>
-              <li>Enter an expression into the math field.</li>
-              <li>Press <strong>Evaluate</strong> or hit <strong>Enter</strong>.</li>
-              <li>A new node appears in the history panel.</li>
-            </ul>
-          </div>
-
-          <div>
-            <h2 className='font-semibold text-sm'>2. Referencing previous nodes</h2>
-            <p className='text-sm'>
-              New expressions can reference earlier nodes, creating <strong>child nodes</strong>.
-              These depend on the value of the parent node. Nodes can be referenced
-              with the <strong>Use</strong> button or
-              using the <strong>$</strong> operator before the name.
-              <br /><br />
-              Example: <code>$a0</code>.
-              <br /><br />
-              A node will be shown as a descendant of the dependency that was most recently created.
-            </p>
-          </div>
-
-          <div>
-            <h2 className='font-semibold text-sm'>3. Automatic updates</h2>
-            <p className='text-sm'>
-              When you edit the equation contained within a node, all of its children (and
-              their children) update automatically. Updates cascade through the
-              tree.
-            </p>
-          </div>
-        </Modal.Body>
-
-        <Modal.Actions>
-          <Button color='primary' onClick={() => setOpen(false)}>
-            Got it
-          </Button>
-        </Modal.Actions>
-      </Modal.Legacy>
-    </>
-  )
-}
-
-/**
  * Toolbar includes the logo, save button, restart button, and settings button equipped with the
  * settings pop-up.
  */
@@ -173,7 +99,6 @@ export function Toolbar (): React.ReactNode {
         </Navbar.Center>
 
         <Navbar.End>
-          <GuideButton />
           <SettingsButton />
         </Navbar.End>
       </Navbar>
