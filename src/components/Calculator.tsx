@@ -182,7 +182,7 @@ export function Calculator (): React.ReactNode {
               { label: 'x^\\placeholder{}', symbol: 'x^{\\placeholder{}}' },
               { label: '{\\placeholder{}}^2', symbol: '{\\placeholder{}}^2' },
               { label: '\\tiny{\\frac{\\placeholder{}}{{\\placeholder{}}}}', symbol: '\\frac{\\placeholder{}}{{\\placeholder{}}}', inflate: true },
-              { label: '\\frac{d}{dx}', symbol: '(\\placeholder{})\\prime' },
+              { label: '\\frac{d}{d\\placeholder{}}', symbol: '\\frac{d}{d\\placeholder{}}' },
               { label: '∫', symbol: '\\int{\\placeholder{}}dx' },
               { label: '\\int_{\\placeholder{}}^{\\placeholder{}}\\placeholder{}', symbol: '\\int_{\\placeholder{}}^{\\placeholder{}}\\placeholder{} dx' },
               { label: '{\\placeholder{}}!', symbol: '{\\placeholder{}}!' }
