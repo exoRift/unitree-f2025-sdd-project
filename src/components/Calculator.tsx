@@ -153,7 +153,7 @@ export function Calculator (): React.ReactNode {
               ? (
                 <p className='text-error ml-auto' key='result'>
                   {errors.map((e, i) => (
-                    <span key={i} className='not-last:after:content-["_|_"] after:text-base-content/50 after:font-bold'>{e.toString().replaceAll("\\\"", "\"").replace(/^Error\(\"/, '').replace(/\"\)$/, '')}</span>
+                    <span key={i} className='not-last:after:content-["_|_"] after:text-base-content/50 after:font-bold'>Error: {e.toString().replaceAll("\\\"", "\"").replace(/^Error\(\"/, '').replace(/\"\)$/, '')}</span>
                   ))}
                 </p>
               )
