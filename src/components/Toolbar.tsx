@@ -60,16 +60,6 @@ function SettingsButton (): React.ReactNode {
 
               <Toggle className='grid' color='primary' id='snap' checked={settings.saveSession} onChange={() => setSaveSession(!settings.saveSession)} />
             </div>
-
-            <div className='space-y-1'>
-              <label htmlFor='theme' className='font-bold text-lg'>Theme</label>
-
-              <Select className='block' value={settings.theme} onChange={(e) => setters.theme(e.currentTarget.value as SettingsSchema['theme'])}>
-                <Select.Option value='system'>System</Select.Option>
-                <Select.Option value='light'>Light</Select.Option>
-                <Select.Option value='dark'>Dark</Select.Option>
-              </Select>
-            </div>
           </div>
 
           <Modal.Actions>
